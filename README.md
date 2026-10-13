@@ -73,6 +73,11 @@ It lints the draft rows, shows you the whole table with the hours per issue, and
 
 These skills are process logic only and ship no Redmine data. The project they are installed into must provide the files below. The only file a skill creates is `history/<issue-id>-<slug>.md`: `redmy-generate` creates it the first time an issue has real work hours.
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="assets/redmy-contract-dark.webp"><img src="assets/redmy-contract.webp" alt="Which skill touches which project file. The columns are sync, generate and apply. Each row is a file in your project, with an eye where the skill reads it, a pencil where it writes it, and an empty slot where it never touches it. task-registry.md, one row per Redmine issue: sync reads and writes, generate reads, apply does not touch it. checkpoint.md, last logged date and hours: generate reads, apply writes, sync does not touch it. git-identity-map.md, which git author is you: generate reads and writes, sync and apply do not touch it. decisions.md, resolved ambiguities: sync writes, generate reads and writes, apply does not touch it. history/&lt;issue-id&gt;-&lt;slug&gt;.md, one worklog table per issue: generate writes and creates it, apply reads and writes, sync does not touch it; it is the only file a skill creates. Redmine base URL, the root URL of your Redmine: apply reads it, sync and generate do not touch it." width="100%"></picture>
+
+<details>
+<summary>The data contract as a table</summary>
+
 | File | What it holds | Touched by |
 |---|---|---|
 | `task-registry.md` | one row per Redmine issue or epic: ID, project, subject, status, repo path mapping, a Constraints column | `redmy-sync` reads and writes; `redmy-generate` reads |
@@ -82,7 +87,9 @@ These skills are process logic only and ship no Redmine data. The project they a
 | `history/<issue-id>-<slug>.md` | one append-only worklog table per issue: Date, Hours, Activity, Redmine Comment, Worklog, Evidence | `redmy-generate` appends; `redmy-apply` reads and updates |
 | Redmine base URL, `<REDMINE_BASE_URL>` | the root URL of your Redmine instance | `redmy-apply` builds the worklog link from it |
 
-The column names above are the ones the skills read. A reference implementation of this data contract lives in the original working repo this was extracted from (not part of this skills repo). The known gaps are tracked in [docs/baseline/redmy/](docs/baseline/redmy/redmy.roadmap.md).
+</details>
+
+The column names in the table are the ones the skills read. A reference implementation of this data contract lives in the original working repo this was extracted from (not part of this skills repo). The known gaps are tracked in [docs/baseline/redmy/](docs/baseline/redmy/redmy.roadmap.md).
 
 <details>
 <summary>Drafting rules <code>redmy-generate</code> follows</summary>

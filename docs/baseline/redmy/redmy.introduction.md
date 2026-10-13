@@ -4,14 +4,14 @@ pack: "redmy"
 document: "introduction"
 status: "active"
 updated: "2026-10-13"
-code_ref: "74bd929"
+code_ref: "37d69c3"
 ---
 
 # RedMy - data-contract tech debt
 
 ## Scope
 
-RedMy is a repository of three agent skills (`redmy-sync`, `redmy-generate`, `redmy-apply`) that draft Redmine worklogs from git history and log them only after the user approves the exact table. The skills depend on files in the project they are installed into; this pack tracks the debt in that dependency: the formats and creation of those files are not defined in this repo. Out of scope: Redmine API behavior and the README illustration work. In scope from the README: only its data-contract wording (Phase 2 in roadmap).
+RedMy is a repository of three agent skills (`redmy-sync`, `redmy-generate`, `redmy-apply`) that draft Redmine worklogs from git history and log them only after the user approves the exact table. The skills depend on files in the project they are installed into; this pack tracks the debt in that dependency: the formats and creation of those files are not defined in this repo. Out of scope: Redmine API behavior and the README illustration work (pack `frontdoor`). In scope from the README: only its data-contract wording (Phase 2 in roadmap).
 
 ## Current truth
 

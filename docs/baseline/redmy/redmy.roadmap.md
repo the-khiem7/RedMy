@@ -4,7 +4,7 @@ pack: "redmy"
 document: "roadmap"
 status: "active"
 updated: "2026-10-13"
-code_ref: "74bd929"
+code_ref: "37d69c3"
 ---
 
 # RedMy - roadmap

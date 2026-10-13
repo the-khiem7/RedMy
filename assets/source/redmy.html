@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <title>RedMy illustrations</title>
-<!-- Source of ../redmy-hero, ../redmy-flow, ../redmy-sync, ../redmy-generate and ../redmy-apply (.webp and -dark.webp). Render with:
+<!-- Source of ../redmy-hero, ../redmy-flow, ../redmy-sync, ../redmy-generate, ../redmy-apply and ../redmy-contract (.webp and -dark.webp). Render with:
      uvx --from playwright --with pillow python -I <skill-dir>/scripts/render.py assets/source/redmy.html --root assets --out assets
      Each .item is 1200 CSS px wide, so 2400 px in the image.
      Signature:
@@ -49,6 +49,10 @@
 
 <div class="item" id="redmy-apply" style="height: 440px">
   <svg class="art" id="s-apply" viewBox="0 0 1200 440" width="1200" height="440" aria-hidden="true"></svg>
+</div>
+
+<div class="item" id="redmy-contract" style="height: 640px">
+  <svg class="art" id="s-contract" viewBox="0 0 1200 640" width="1200" height="640" aria-hidden="true"></svg>
 </div>
 
 </div>
@@ -313,6 +317,72 @@ const arrow = (p, d) => E("path", { d, fill: "none", stroke: "var(--ink)", "stro
   E("text", { x: 532, y: 436 }, svg, "last logged date");
   arrow(svg, "M1000 384V468");
   E("text", { x: 988, y: 436, "text-anchor": "end" }, svg, "checkpoint moves");
+}
+
+/* ---------- contract: which skill touches which project file ---------- */
+{
+  const svg = S("s-contract");
+  const cols = [{ x: 470, name: "sync", w: 110 }, { x: 710, name: "generate", w: 170 }, { x: 950, name: "apply", w: 110 }];
+  const rows = [
+    ["task-registry.md", "one row per Redmine issue", ["rw", "r", ""]],
+    ["checkpoint.md", "last logged date and hours", ["", "r", "w"]],
+    ["git-identity-map.md", "which git author is you", ["", "rw", ""]],
+    ["decisions.md", "resolved ambiguities, RW-D<n>", ["w", "rw", ""]],
+    ["history/<issue-id>-<slug>.md", "one worklog table per issue", ["", "wc", "rw"]],
+    ["Redmine base URL", "root URL of your Redmine", ["", "", "r"]],
+  ];
+  const CW = 210, CH = 64;
+  const eye = (cx, cy) => {
+    E("path", { d: `M${cx - 17} ${cy}Q${cx} ${cy - 15} ${cx + 17} ${cy}Q${cx} ${cy + 15} ${cx - 17} ${cy}Z`, fill: "var(--paper)", stroke: "var(--line)", "stroke-width": 2, "stroke-linejoin": "round" }, svg);
+    E("circle", { cx, cy, r: 5.5, fill: "var(--line)" }, svg);
+  };
+  const pencil = (cx, cy) => {
+    const g = E("g", { transform: `translate(${cx} ${cy}) rotate(-35)` }, svg);
+    E("rect", { x: -22, y: -5, width: 6, height: 10, fill: "var(--flag)", stroke: "var(--brassink)", "stroke-width": 1.5 }, g);
+    E("rect", { x: -16, y: -5, width: 30, height: 10, fill: "var(--brass)", stroke: "var(--brassink)", "stroke-width": 1.5 }, g);
+    E("path", { d: "M14 -5L26 0L14 5Z", fill: "var(--env)", stroke: "var(--brassink)", "stroke-width": 1.5, "stroke-linejoin": "round" }, g);
+    E("path", { d: "M22.5 -1.8L26 0L22.5 1.8Z", fill: "var(--brassink)" }, g);
+  };
+  const hole = (x, y) => {
+    E("rect", { x, y, width: CW, height: CH, rx: 5, fill: "var(--wall)" }, svg);
+    E("rect", { x: x + 8, y: y + 8, width: CW - 16, height: CH - 16, rx: 3, fill: "var(--hole)" }, svg);
+  };
+
+  E("text", { x: 40, y: 56 }, svg, "files in your project");
+  cols.forEach((c) => nameplate(svg, c.x + CW / 2 - c.w / 2, 26, c.w, c.name));
+
+  rows.forEach((r, i) => {
+    const y = 100 + i * 76;
+    E("rect", { x: 28, y: y - 6, width: 1144, height: 76, rx: 8, fill: "var(--bay)" }, svg);
+    E("rect", { x: 40, y, width: 400, height: CH, rx: 4, fill: "var(--paper)", stroke: "var(--line)", "stroke-width": 2 }, svg);
+    E("text", { x: 56, y: y + 27, class: "f18 onpaper" }, svg, r[0]);
+    E("text", { x: 56, y: y + 50, class: "onpaper" }, svg, r[1]);
+    r[2].forEach((v, j) => {
+      const x = cols[j].x;
+      hole(x, y);
+      const cx = x + CW / 2, cy = y + CH / 2;
+      if (v === "r") eye(cx, cy);
+      if (v === "w") pencil(cx, cy);
+      if (v === "rw") { eye(cx - 30, cy); pencil(cx + 32, cy); }
+      if (v === "wc") {
+        pencil(cx - 62, cy);
+        E("rect", { x: cx - 26, y: cy - 14, width: 90, height: 28, rx: 3, fill: "var(--paper)", stroke: "var(--line)", "stroke-width": 1.5 }, svg);
+        E("text", { x: cx + 19, y: cy + 6, "text-anchor": "middle", class: "onpaper" }, svg, "creates");
+      }
+    });
+  });
+
+  // legend
+  const ly = 598;
+  eye(58, ly - 6);
+  E("text", { x: 84, y: ly }, svg, "reads");
+  pencil(210, ly - 6);
+  E("text", { x: 242, y: ly }, svg, "writes");
+  E("rect", { x: 360, y: ly - 24, width: 44, height: 28, rx: 4, fill: "var(--hole)", stroke: "var(--wall)", "stroke-width": 3 }, svg);
+  E("text", { x: 416, y: ly }, svg, "never touches");
+  E("rect", { x: 596, y: ly - 20, width: 90, height: 28, rx: 3, fill: "var(--paper)", stroke: "var(--line)", "stroke-width": 1.5 }, svg);
+  E("text", { x: 641, y: ly - 1, "text-anchor": "middle", class: "onpaper" }, svg, "creates");
+  E("text", { x: 698, y: ly }, svg, "the only file a skill creates");
 }
 </script>
 </body>
