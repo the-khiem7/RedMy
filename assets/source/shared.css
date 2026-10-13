@@ -1,0 +1,64 @@
+/* RedMy illustration tokens. The look is the sorting-office signature described at the top of redmy.html.
+   Contract with render.py: .item blocks inside .sheet, each zoomed 2x; theming only through
+   html[data-theme="dark"] (set by shared.js from ?theme=dark); --cardline is the border of the finished image. */
+
+:root {
+  --ground: #ece6d6;   /* painted office wall behind the pigeonholes */
+  --ink: #16323a;      /* text and outlines on the ground */
+  --muted: #4f6168;
+  --wall: #1f5c63;     /* pigeonhole frame */
+  --hole: #123c42;     /* inside of a pigeonhole */
+  --paper: #fbf7ec;    /* cards and slips: cream in both themes */
+  --line: #16323a;     /* outlines and text on cream objects: dark in both themes */
+  --env: #f6f0e0;
+  --env2: #ead9b8;
+  --brass: #d9a62e;
+  --brassink: #4a3608;
+  --metal: #b9c6c8;
+  --bay: #e3dbc7;      /* a panel behind one skill's part of a diagram */
+  --pencil: #8f8f86;
+  --stampp: #b92c1a;   /* franking red on cream */
+  --flag: #e0432d;     /* red on a pigeonhole */
+  --redtext: #b92c1a;  /* red text on the ground */
+  --cardline: #a8a08a;
+}
+html[data-theme="dark"] {
+  --ground: #0b1a1d;
+  --ink: #efe8d6;
+  --muted: #a9b6b3;
+  --wall: #16484f;
+  --hole: #082a2f;
+  --paper: #e9e1cc;
+  --env: #e9e1cc;
+  --env2: #cdb98f;
+  --brass: #e5b43c;
+  --metal: #3a5d63;
+  --bay: #0f2327;
+  --flag: #ff6a55;
+  --redtext: #ff7a66;
+  --cardline: #25444a;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; background: #888; }
+.sheet { width: max-content; padding: 24px; display: flex; flex-direction: column; gap: 16px; }
+.item {
+  zoom: 2; position: relative; overflow: hidden; width: 1200px;
+  font-family: "Courier Prime", "Courier New", monospace; color: var(--ink); background: var(--ground);
+}
+.item svg.art { position: absolute; inset: 0; }
+
+.title { position: absolute; left: 68px; top: 46px; margin: 0; font: 400 124px/1.05 "Bowlby One", sans-serif; letter-spacing: .005em; }
+.tag { position: absolute; left: 74px; top: 204px; width: 520px; font-size: 22px; line-height: 1.5; font-weight: 700; }
+.tag span { color: var(--muted); font-weight: 400; }
+
+svg text { font-family: "Courier Prime", "Courier New", monospace; font-size: 17px; fill: var(--ink); }
+svg text.onpaper { fill: var(--line); }
+svg text.muted { fill: var(--muted); }
+svg text.red { fill: var(--redtext); }
+svg text.plate-t { font-family: "Bowlby One", sans-serif; fill: var(--brassink); }
+svg text.name-t { font-family: "Bowlby One", sans-serif; font-size: 24px; fill: var(--brassink); }
+svg text.big { font-family: "Bowlby One", sans-serif; font-size: 22px; }
+svg text.stampt { font-family: "Bowlby One", sans-serif; fill: var(--stampp); }
+svg text.t20 { font-family: "Bowlby One", sans-serif; font-size: 20px; }
+svg text.f18 { font-size: 18px; }

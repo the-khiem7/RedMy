@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>RedMy illustrations</title>
+<!-- Source of ../redmy-hero, ../redmy-flow, ../redmy-sync, ../redmy-generate and ../redmy-apply (.webp and -dark.webp). Render with:
+     uvx --from playwright --with pillow python -I <skill-dir>/scripts/render.py assets/source/redmy.html --root assets --out assets
+     Each .item is 1200 CSS px wide, so 2400 px in the image.
+     Signature:
+     1. Concept: a sorting office; commits are letters sorted into the pigeonhole of the issue they belong to, and nothing is franked (logged to Redmine) until a person approves the exact table.
+     2. Shape language: flat painted pigeonhole walls, cream envelopes and slips with dark outlines, dashed outline means draft and solid means logged, brass plates, one red franking mark; no characters, no gradients.
+     3. Typeface: Bowlby One (title and plates), Courier Prime (typed labels and tags).
+     4. Palette logic: painted teal wall, mustard brass, cream paper; the only red is the franking and flag red; the dark theme is the same office at night with the paper left cream.
+     5. Presentation: one scene per skill, left to right, a nameplate naming the skill, a few typed tags taken from the skill text; the flow diagram puts one bay per skill with paper cards for the files and systems it touches.
+     6. Not: an email icon set, a train or a kitchen (rounds 1 and 2 of the directions), a blue-purple gradient. -->
+<script src="shared.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bowlby+One&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M1 1L9 5L1 9" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+  </defs>
+</svg>
+<div class="sheet">
+
+<div class="item" id="redmy-hero" style="height: 440px">
+  <svg class="art" id="s-hero" viewBox="0 0 1200 440" width="1200" height="440" aria-hidden="true"></svg>
+  <h1 class="title">RedMy</h1>
+  <div class="tag">Redmine worklogs, drafted<br>from your git history.<br><span>Logged only when you approve<br>the exact table.</span></div>
+</div>
+
+<div class="item" id="redmy-flow" style="height: 560px">
+  <svg class="art" id="s-flow" viewBox="0 0 1200 560" width="1200" height="560" aria-hidden="true"></svg>
+</div>
+
+<div class="item" id="redmy-sync" style="height: 440px">
+  <svg class="art" id="s-sync" viewBox="0 0 1200 440" width="1200" height="440" aria-hidden="true"></svg>
+</div>
+
+<div class="item" id="redmy-generate" style="height: 440px">
+  <svg class="art" id="s-generate" viewBox="0 0 1200 440" width="1200" height="440" aria-hidden="true"></svg>
+</div>
+
+<div class="item" id="redmy-apply" style="height: 440px">
+  <svg class="art" id="s-apply" viewBox="0 0 1200 440" width="1200" height="440" aria-hidden="true"></svg>
+</div>
+
+</div>
+<script>
+const NS = "http://www.w3.org/2000/svg";
+const E = (n, a, p, t) => { const e = document.createElementNS(NS, n); for (const k in a) e.setAttribute(k, a[k]); if (t !== undefined) e.textContent = t; if (p) p.appendChild(e); return e; };
+let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+const S = (id) => document.getElementById(id);
+
+// pigeonhole: frame, dark hole, brass plate with an optional label
+function cubby(p, x, y, w, h, label) {
+  E("rect", { x, y, width: w, height: h, rx: 5, fill: "var(--wall)" }, p);
+  E("rect", { x: x + 9, y: y + 9, width: w - 18, height: h - 44, rx: 2, fill: "var(--hole)" }, p);
+  E("rect", { x: x + w / 2 - 38, y: y + h - 33, width: 76, height: 26, rx: 3, fill: "var(--brass)", stroke: "var(--brassink)", "stroke-width": 1.5 }, p);
+  if (label) E("text", { x: x + w / 2, y: y + h - 14, "text-anchor": "middle", class: "plate-t" }, p, label);
+}
+// envelope = a commit, or the finished letter
+function env(p, x, y, w, h, rot, alt, text) {
+  const g = E("g", { transform: `rotate(${rot} ${x + w / 2} ${y + h / 2})` }, p);
+  E("rect", { x, y, width: w, height: h, rx: 3, fill: alt ? "var(--env2)" : "var(--env)", stroke: "var(--line)", "stroke-width": 2 }, g);
+  E("path", { d: `M${x} ${y}L${x + w / 2} ${y + h * 0.5}L${x + w} ${y}`, fill: "none", stroke: "var(--line)", "stroke-width": 2, "stroke-linejoin": "round" }, g);
+  if (text) E("text", { x: x + w / 2, y: y + h - 9, "text-anchor": "middle", class: "onpaper" }, g, text);
+  return g;
+}
+// draft slip: dashed outline means not logged yet
+function slip(p, x, y, w, h, rot, label) {
+  const g = E("g", { transform: `rotate(${rot} ${x + w / 2} ${y + h / 2})` }, p);
+  E("rect", { x, y, width: w, height: h, rx: 2, fill: "var(--paper)", stroke: "var(--line)", "stroke-width": 2, "stroke-dasharray": "7 5" }, g);
+  if (label) E("text", { x: x + 10, y: y + 27, class: "onpaper" }, g, label);
+  E("path", { d: `M${x + 10} ${y + h - 24}H${x + w - 30}M${x + 10} ${y + h - 11}H${x + w - 52}`, stroke: "var(--pencil)", "stroke-width": 4, "stroke-linecap": "round" }, g);
+  return g;
+}
+// paper tag that sits inside a pigeonhole
+function chip(p, x, y, w, text) {
+  E("rect", { x, y, width: w, height: 28, rx: 3, fill: "var(--paper)", stroke: "var(--line)", "stroke-width": 1.5 }, p);
+  E("text", { x: x + w / 2, y: y + 20, "text-anchor": "middle", class: "onpaper" }, p, text);
+}
+function nameplate(p, x, y, w, text) {
+  E("rect", { x, y, width: w, height: 38, rx: 4, fill: "var(--brass)", stroke: "var(--brassink)", "stroke-width": 2 }, p);
+  E("text", { x: x + w / 2, y: y + 27, "text-anchor": "middle", class: "name-t" }, p, text);
+}
+const arrow = (p, d) => E("path", { d, fill: "none", stroke: "var(--ink)", "stroke-width": 4, "stroke-linecap": "round", "stroke-dasharray": "1 10", "marker-end": "url(#ah)" }, p);
+
+/* ---------- hero ---------- */
+{
+  const svg = S("s-hero");
+  const wall = E("g", { "data-bleed": "" }, svg);
+  for (let r = 0; r < 4; r++) for (let c = 0; c < 5; c++) {
+    const x = 612 + c * 152, y = -26 + r * 138;
+    cubby(wall, x, y, 142, 128, null);
+    if (rnd() > 0.28) env(wall, x + 16 + rnd() * 14, y + 22 + rnd() * 10, 100, 62, (rnd() - .5) * 14, rnd() > .5);
+  }
+  const g = E("g", {}, svg);
+  const f = E("g", { transform: "rotate(-5 545 376)" }, g);
+  E("rect", { x: 430, y: 326, width: 230, height: 100, rx: 4, fill: "var(--env)", stroke: "var(--line)", "stroke-width": 3 }, f);
+  E("path", { d: "M430 326L545 396L660 326", fill: "none", stroke: "var(--line)", "stroke-width": 3, "stroke-linejoin": "round" }, f);
+  E("path", { d: "M492 360q12-12 24 0t24 0t24 0M492 376q12-12 24 0t24 0t24 0", fill: "none", stroke: "var(--stampp)", "stroke-width": 4, "stroke-linecap": "round" }, f);
+  E("circle", { cx: 612, cy: 368, r: 31, fill: "none", stroke: "var(--stampp)", "stroke-width": 4 }, f);
+  E("circle", { cx: 612, cy: 368, r: 23, fill: "none", stroke: "var(--stampp)", "stroke-width": 2 }, f);
+  E("text", { x: 612, y: 374, "text-anchor": "middle", class: "stampt" }, f, "OK");
+}
+
+/* ---------- sync ---------- */
+{
+  const svg = S("s-sync");
+  nameplate(svg, 60, 18, 110, "sync");
+  // the Redmine list, read only
+  E("rect", { x: 60, y: 84, width: 250, height: 270, rx: 4, fill: "var(--paper)", stroke: "var(--line)", "stroke-width": 2.5 }, svg);
+  E("rect", { x: 150, y: 74, width: 70, height: 20, rx: 4, fill: "var(--ink)" }, svg);
+  E("text", { x: 80, y: 130, class: "big onpaper" }, svg, "Redmine");
+  const lens = [150, 120, 160, 100, 140];
+  for (let i = 0; i < 5; i++) {
+    const y = 152 + i * 38;
+    E("rect", { x: 80, y, width: 18, height: 18, rx: 2, fill: "none", stroke: "var(--line)", "stroke-width": 2 }, svg);
+    E("rect", { x: 110, y: y + 4, width: lens[i], height: 10, rx: 2, fill: "var(--pencil)" }, svg);
+  }
+  E("path", { d: "M62 392Q82 376 102 392Q82 408 62 392Z", fill: "none", stroke: "var(--ink)", "stroke-width": 2.5, "stroke-linejoin": "round" }, svg);
+  E("circle", { cx: 82, cy: 392, r: 5, fill: "var(--ink)" }, svg);
+  E("text", { x: 114, y: 398 }, svg, "read only");
+  arrow(svg, "M326 139H462");
+  arrow(svg, "M326 301H462");
+  // the registry wall
+  const lab = ["#101", "#102", "#103", "#104", "#105", "#106"];
+  for (let r = 0; r < 2; r++) for (let c = 0; c < 3; c++) {
+    const x = 480 + c * 218, y = 64 + r * 162, i = r * 3 + c;
+    cubby(svg, x, y, 206, 150, lab[i]);
+    if (i === 0) env(svg, x + 42, y + 34, 104, 64, -4, false);
+    if (i === 1) { chip(svg, x + 16, y + 16, 96, "updated"); env(svg, x + 54, y + 52, 104, 60, 3, true); }
+    if (i === 2) chip(svg, x + 66, y + 40, 60, "new");
+    if (i === 3) env(svg, x + 50, y + 30, 104, 64, 3, true);
+    if (i === 4) { chip(svg, x + 16, y + 16, 146, "closed, kept"); env(svg, x + 54, y + 52, 104, 60, -3, false); }
+    if (i === 5) env(svg, x + 38, y + 32, 104, 64, -5, false);
+  }
+  E("text", { x: 480, y: 408 }, svg, "task-registry.md");
+}
+
+/* ---------- generate ---------- */
+{
+  const svg = S("s-generate");
+  nameplate(svg, 60, 18, 170, "generate");
+  // tray of commits
+  E("path", { d: "M60 244H300L286 378H74Z", fill: "var(--wall)" }, svg);
+  E("path", { d: "M74 256H286L279 366H81Z", fill: "var(--hole)" }, svg);
+  env(svg, 196, 226, 104, 64, 9, true);
+  env(svg, 120, 206, 104, 64, -3, true);
+  env(svg, 78, 246, 108, 64, -6, false, "a1b2c3d");
+  env(svg, 176, 240, 108, 64, 5, false, "e4f5a6b");
+  E("path", { d: "M66 312H294L286 378H74Z", fill: "var(--wall)" }, svg);
+  E("text", { x: 180, y: 406, "text-anchor": "middle" }, svg, "git log, your commits");
+  arrow(svg, "M318 236C340 236 338 139 362 139");
+  arrow(svg, "M318 292C340 292 340 299 362 299");
+  // one pigeonhole per issue, each holding draft slips
+  const lab = ["#101", "#102", "#103", "#104", "#105", "#106"];
+  for (let r = 0; r < 2; r++) for (let c = 0; c < 3; c++) {
+    const x = 372 + c * 180, y = 64 + r * 160, i = r * 3 + c;
+    cubby(svg, x, y, 170, 150, lab[i]);
+    slip(svg, x + 14, y + 22, 124, 76, [-3, 2, -2, 3, -3, 2][i], "Not logged");
+    if (i === 5) {
+      E("path", { d: `M${x + 132} ${y + 12}V${y + 44}`, stroke: "var(--ink)", "stroke-width": 3, "stroke-linecap": "round" }, svg);
+      E("path", { d: `M${x + 132} ${y + 12}L${x + 158} ${y + 21}L${x + 132} ${y + 31}Z`, fill: "var(--flag)" }, svg);
+      E("path", { d: `M${x + 160} ${y + 24}L922 290`, fill: "none", stroke: "var(--flag)", "stroke-width": 3, "stroke-linecap": "round", "stroke-dasharray": "1 8" }, svg);
+    }
+  }
+  E("text", { x: 930, y: 300, class: "red" }, svg, "[needs confirmation]");
+  E("text", { x: 372, y: 406 }, svg, "appended to history/");
+  // Redmine stays shut
+  E("text", { x: 1065, y: 76, "text-anchor": "middle", class: "big" }, svg, "Redmine");
+  E("rect", { x: 990, y: 90, width: 150, height: 120, rx: 6, fill: "var(--metal)", stroke: "var(--ink)", "stroke-width": 3 }, svg);
+  for (let i = 0; i < 6; i++) E("path", { d: `M1002 ${108 + i * 17}H1128`, stroke: "var(--ink)", "stroke-width": 2.5, opacity: ".5" }, svg);
+  E("path", { d: "M1051 140V130a14 14 0 0 1 28 0V140", fill: "none", stroke: "var(--ink)", "stroke-width": 4, "stroke-linecap": "round" }, svg);
+  E("rect", { x: 1043, y: 140, width: 44, height: 34, rx: 5, fill: "var(--brass)", stroke: "var(--brassink)", "stroke-width": 2 }, svg);
+  E("text", { x: 1140, y: 238, "text-anchor": "end" }, svg, "no Redmine writes");
+}
+
+/* ---------- apply ---------- */
+{
+  const svg = S("s-apply");
+  nameplate(svg, 60, 18, 110, "apply");
+  // the drafts
+  slip(svg, 70, 196, 130, 78, -7);
+  slip(svg, 66, 186, 130, 78, 2);
+  slip(svg, 64, 176, 130, 78, -3, "Not logged");
+  arrow(svg, "M206 226H368");
+  E("rect", { x: 244, y: 212, width: 62, height: 28, rx: 3, fill: "var(--brass)", stroke: "var(--brassink)", "stroke-width": 1.5 }, svg);
+  E("text", { x: 275, y: 232, "text-anchor": "middle", class: "plate-t" }, svg, "lint");
+  // the exact table, approved
+  E("rect", { x: 376, y: 84, width: 236, height: 250, rx: 4, fill: "var(--paper)", stroke: "var(--line)", "stroke-width": 2.5 }, svg);
+  E("text", { x: 394, y: 118, class: "onpaper" }, svg, "this exact table");
+  const bars = [[90, 60], [70, 80], [110, 50]];
+  for (let i = 0; i < 3; i++) {
+    const y = 140 + i * 44;
+    E("rect", { x: 394, y: y + 4, width: bars[i][0], height: 10, rx: 2, fill: "var(--pencil)" }, svg);
+    E("rect", { x: 394 + bars[i][0] + 12, y: y + 4, width: bars[i][1], height: 10, rx: 2, fill: "var(--pencil)" }, svg);
+  }
+  E("rect", { x: 394, y: 274, width: 30, height: 30, rx: 4, fill: "none", stroke: "var(--line)", "stroke-width": 2.5 }, svg);
+  E("path", { d: "M401 290l8 9 16-22", fill: "none", stroke: "var(--stampp)", "stroke-width": 5, "stroke-linecap": "round", "stroke-linejoin": "round" }, svg);
+  E("text", { x: 436, y: 297, class: "onpaper" }, svg, "approved");
+  arrow(svg, "M620 210H664");
+  // the franking press
+  E("rect", { x: 680, y: 300, width: 180, height: 22, rx: 3, fill: "var(--metal)", stroke: "var(--ink)", "stroke-width": 3 }, svg);
+  env(svg, 724, 244, 112, 56, 0, false);
+  E("circle", { cx: 806, cy: 268, r: 22, fill: "none", stroke: "var(--stampp)", "stroke-width": 4 }, svg);
+  E("circle", { cx: 806, cy: 268, r: 15, fill: "none", stroke: "var(--stampp)", "stroke-width": 2 }, svg);
+  E("rect", { x: 696, y: 138, width: 20, height: 164, rx: 2, fill: "var(--metal)", stroke: "var(--ink)", "stroke-width": 3 }, svg);
+  E("rect", { x: 696, y: 128, width: 150, height: 22, rx: 8, fill: "var(--metal)", stroke: "var(--ink)", "stroke-width": 3 }, svg);
+  E("rect", { x: 790, y: 150, width: 10, height: 26, fill: "var(--ink)" }, svg);
+  E("rect", { x: 770, y: 176, width: 50, height: 34, rx: 5, fill: "var(--ink)" }, svg);
+  E("path", { d: "M846 140L872 104", stroke: "var(--ink)", "stroke-width": 6, "stroke-linecap": "round" }, svg);
+  E("circle", { cx: 876, cy: 98, r: 10, fill: "var(--flag)", stroke: "var(--ink)", "stroke-width": 2 }, svg);
+  arrow(svg, "M872 268H916");
+  // Redmine, the shutter raised
+  E("text", { x: 1032, y: 82, "text-anchor": "middle", class: "big" }, svg, "Redmine");
+  E("rect", { x: 924, y: 96, width: 216, height: 226, rx: 6, fill: "var(--metal)", stroke: "var(--ink)", "stroke-width": 3 }, svg);
+  E("rect", { x: 938, y: 134, width: 188, height: 174, fill: "var(--hole)" }, svg);
+  E("rect", { x: 938, y: 106, width: 188, height: 26, rx: 3, fill: "var(--metal)", stroke: "var(--ink)", "stroke-width": 2 }, svg);
+  E("path", { d: "M944 114H1120M944 124H1120", stroke: "var(--ink)", "stroke-width": 2.5, opacity: ".5" }, svg);
+  env(svg, 952, 188, 160, 98, -3, false, "View worklog");
+  // the checkpoint moves forward
+  E("rect", { x: 60, y: 368, width: 1080, height: 36, rx: 4, fill: "var(--paper)", stroke: "var(--line)", "stroke-width": 2 }, svg);
+  E("text", { x: 76, y: 392, class: "onpaper" }, svg, "checkpoint.md");
+  for (let x = 250; x <= 1124; x += 22) E("path", { d: `M${x} 388V398`, stroke: "var(--pencil)", "stroke-width": 2 }, svg);
+  E("path", { d: "M600 366L588 344H612Z", fill: "none", stroke: "var(--ink)", "stroke-width": 2, "stroke-dasharray": "5 4", "stroke-linejoin": "round" }, svg);
+  E("path", { d: "M900 366L888 344H912Z", fill: "var(--brass)", stroke: "var(--brassink)", "stroke-width": 2, "stroke-linejoin": "round" }, svg);
+  arrow(svg, "M626 346H878");
+}
+
+/* ---------- flow ---------- */
+{
+  const svg = S("s-flow");
+  const bay = (x, y, w, h, name, nw) => {
+    E("rect", { x, y, width: w, height: h, rx: 10, fill: "var(--bay)", stroke: "var(--cardline)", "stroke-width": 2 }, svg);
+    nameplate(svg, x + 16, y + 14, nw, name);
+  };
+  const card = (x, y, w, title, sub, cls, icon) => {
+    E("rect", { x, y, width: w, height: 70, rx: 4, fill: "var(--paper)", stroke: "var(--line)", "stroke-width": 2 }, svg);
+    if (icon) icon(x + 12, y + 19);
+    const tx = x + 64;
+    E("text", { x: tx, y: y + 30, class: cls + " onpaper" }, svg, title);
+    E("text", { x: tx, y: y + 54, class: "onpaper" }, svg, sub);
+  };
+  const line = { stroke: "var(--line)", "stroke-width": 2 };
+  const hatchClosed = (x, y) => {
+    E("rect", { x, y, width: 40, height: 32, rx: 3, fill: "var(--metal)", ...line }, svg);
+    for (let i = 0; i < 3; i++) E("path", { d: `M${x + 5} ${y + 9 + i * 8}H${x + 35}`, ...line, opacity: ".5" }, svg);
+  };
+  const hatchOpen = (x, y) => {
+    E("rect", { x, y, width: 40, height: 32, rx: 3, fill: "var(--metal)", ...line }, svg);
+    E("rect", { x: x + 4, y: y + 9, width: 32, height: 19, fill: "var(--hole)" }, svg);
+    E("rect", { x: x + 10, y: y + 15, width: 20, height: 12, fill: "var(--env)", ...line, "stroke-width": 1.5 }, svg);
+    E("rect", { x: x + 4, y: y + 3, width: 32, height: 6, fill: "var(--metal)", ...line, "stroke-width": 1.5 }, svg);
+  };
+  const hole = (x, y) => {
+    E("rect", { x, y, width: 40, height: 32, rx: 3, fill: "var(--wall)", ...line }, svg);
+    E("rect", { x: x + 5, y: y + 4, width: 30, height: 15, fill: "var(--hole)" }, svg);
+    E("rect", { x: x + 11, y: y + 22, width: 18, height: 6, rx: 1, fill: "var(--brass)" }, svg);
+  };
+  const envIcon = (x, y) => {
+    E("rect", { x, y: y + 2, width: 40, height: 28, rx: 2, fill: "var(--env)", ...line }, svg);
+    E("path", { d: `M${x} ${y + 2}L${x + 20} ${y + 16}L${x + 40} ${y + 2}`, fill: "none", ...line, "stroke-linejoin": "round" }, svg);
+  };
+  const slipIcon = (x, y) => {
+    E("rect", { x, y: y + 2, width: 40, height: 28, rx: 2, fill: "var(--paper)", ...line, "stroke-dasharray": "5 3" }, svg);
+    E("path", { d: `M${x + 7} ${y + 14}H${x + 33}M${x + 7} ${y + 22}H${x + 24}`, stroke: "var(--pencil)", "stroke-width": 3, "stroke-linecap": "round" }, svg);
+  };
+  const tickIcon = (x, y) => {
+    E("rect", { x: x + 5, y: y + 1, width: 30, height: 30, rx: 4, fill: "none", ...line, "stroke-width": 2.5 }, svg);
+    E("path", { d: `M${x + 11} ${y + 17}l7 8 14-19`, fill: "none", stroke: "var(--stampp)", "stroke-width": 4.5, "stroke-linecap": "round", "stroke-linejoin": "round" }, svg);
+  };
+
+  // the three parts, one bay per skill
+  bay(40, 76, 300, 304, "sync", 110);
+  bay(376, 76, 360, 304, "generate", 170);
+  bay(772, 76, 388, 304, "apply", 110);
+
+  card(60, 146, 260, "Redmine", "read only", "t20", hatchClosed);
+  card(60, 266, 260, "task-registry.md", "one row per issue", "f18", hole);
+  card(396, 146, 320, "git log", "your commits only", "f18", envIcon);
+  card(396, 266, 320, "history/*.md", "draft rows: Not logged", "f18", slipIcon);
+  card(792, 146, 348, "you approve", "lint, then the exact table", "t20", tickIcon);
+  card(792, 266, 348, "Redmine", "the only write to Redmine", "t20", hatchOpen);
+
+  // reads and writes
+  arrow(svg, "M190 218V262");
+  E("text", { x: 222, y: 240 }, svg, "your issues");
+  arrow(svg, "M556 218V262");
+  E("text", { x: 580, y: 240 }, svg, "sorted by issue");
+  arrow(svg, "M966 218V262");
+  E("text", { x: 1000, y: 240 }, svg, "approved");
+  arrow(svg, "M322 301H372");
+  arrow(svg, "M718 301H754V181H768");
+  E("text", { x: 792, y: 366, class: "muted" }, svg, "no approval, nothing is logged");
+
+  // branch: generate refreshes the registry first when it is stale
+  arrow(svg, "M470 74V46H190V72");
+  E("text", { x: 204, y: 36 }, svg, "stale registry: sync first");
+
+  // the checkpoint is read by generate and moved by apply
+  E("rect", { x: 376, y: 470, width: 784, height: 36, rx: 4, fill: "var(--paper)", stroke: "var(--line)", "stroke-width": 2 }, svg);
+  E("text", { x: 392, y: 494, class: "onpaper" }, svg, "checkpoint.md");
+  for (let x = 560; x <= 1144; x += 22) E("path", { d: `M${x} 490V500`, stroke: "var(--pencil)", "stroke-width": 2 }, svg);
+  arrow(svg, "M520 468V384");
+  E("text", { x: 532, y: 436 }, svg, "last logged date");
+  arrow(svg, "M1000 384V468");
+  E("text", { x: 988, y: 436, "text-anchor": "end" }, svg, "checkpoint moves");
+}
+</script>
+</body>
+</html>
