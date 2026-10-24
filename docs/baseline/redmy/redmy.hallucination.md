@@ -4,7 +4,7 @@ pack: "redmy"
 document: "hallucination"
 status: "active"
 updated: "2026-10-24"
-code_ref: "b2b9c8c"
+code_ref: "3662e83"
 ---
 
 # RedMy - decisions and open questions
@@ -30,6 +30,7 @@ code_ref: "b2b9c8c"
 | RM-D14 | Format of a skipped row | closed | RM-Q4, RM-D8 |
 | RM-D15 | How a logged entry is corrected or removed | closed | RM-Q5, RM-D3 |
 | RM-D16 | `list_time_entries` ignores its date filters | closed - lesson | RM-D3, RM-D10, RM-Q3 |
+| RM-D17 | A read-only weekly board skill, redmy-board | closed | RM-D16, RM-D15 |
 
 ## Closed decisions
 
@@ -162,6 +163,13 @@ Closes RM-Q5.
 - Decision: every date-window read of time entries uses `redmine_raw_request` GET with `from`, `to`, `limit` and `offset` (b2b9c8c); sync and apply may call it with GET only.
 - What breaks if ignored: apply step 2 marks every draft row a possible duplicate, and sync reads the user's whole history instead of the window.
 - Rejected: filtering the `list_time_entries` result by `spent_on` in the agent (works only while all entries fit in one page of 100, and the tool has no offset).
+
+### RM-D17: redmy-board shows one week as a read-only board
+
+- Decision: a fifth skill renders Monday to Sunday as a day-by-issue table of logged (from Redmine) and draft (from `history/*.md`) hours, with a fixed legend, a status list and the week total if every draft is approved; it reconciles entry ids against worklog links and marks days with commits but no row. It writes nothing. Requested by the user on 2026-10-24 after the same board was shown by hand.
+- Why: no skill answered where a week stands without moving the cycle forward - generate appends rows and apply leads to the write gate; a fixed shape keeps the board the same from week to week.
+- What breaks if ignored: the board depends on the agent improvising it, and a mismatch such as an entry on Redmine whose row is Skipped is found only by chance.
+- Rejected: a board step inside redmy-sync (sync writes `task-registry.md`, so the board would no longer be safe to ask for at any time); a board step inside redmy-apply (it would sit in front of the write gate, where a request to look turns into a request to log).
 
 ## Open questions
 

@@ -4,7 +4,7 @@ pack: "redmy"
 document: "sourcecode"
 status: "active"
 updated: "2026-10-24"
-code_ref: "b2b9c8c"
+code_ref: "3662e83"
 ---
 
 # RedMy - contract topology
@@ -15,10 +15,13 @@ code_ref: "b2b9c8c"
 1. redmy-sync checks the Redmine login against `redmine_user`, then refreshes `task-registry.md` from the user's assigned issues and own time entries and asks for every undetermined repo path; redmy-generate runs it inline first when `last_synced` is missing or more than 3 days old (generate step 0).
 2. redmy-generate reads the checkpoint (or `tracking_since` for an issue with no row), the SHAs already cited in `history/*.md`, the git identity map and the registry, then appends draft rows (`Worklog` = `Not logged`) to `history/*.md` and hands over to redmy-apply.
 3. redmy-apply checks the login, checks Redmine for an existing entry per row, lints, shows the whole table, and calls `smart_log_time` row by row only after the user approves that exact table; it writes each worklog link right after its call and then advances `checkpoint.md`. Its correction flow gives the user a delete link and updates the files once the entry is gone.
+4. redmy-board runs at any point: it reads one week from Redmine and `history/*.md`, plus `git log` for days with no row, and writes nothing.
 
 ## Who reads and writes which project file
 
 R reads, W writes, C creates when missing, a dash means the skill never mentions it. Every cell is from the skill steps.
+
+redmy-board only reads: `task-registry.md`, `git-identity-map.md` and `history/*.md` (steps 0, 3 and 5), and is left out of the table.
 
 | File | redmy-core | redmy-sync | redmy-generate | redmy-apply |
 |---|---|---|---|---|
@@ -41,6 +44,7 @@ R reads, W writes, C creates when missing, a dash means the skill never mentions
 | redmy-sync | `get_current_user`, `list_issues`, `get_issue`, `redmine_raw_request` GET `/time_entries.json` | none |
 | redmy-generate | `list_issues`, `list_projects` | none |
 | redmy-apply | `get_current_user`, `redmine_raw_request` GET `/time_entries.json` | `smart_log_time` |
+| redmy-board | `get_current_user`, `redmine_raw_request` GET `/time_entries.json` | none |
 
 - `list_time_entries` is not used: it ignores `from_date`/`to_date` and has no offset (RM-D16 in hallucination).
 

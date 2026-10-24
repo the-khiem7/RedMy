@@ -4,7 +4,7 @@ pack: "redmy"
 document: "roadmap"
 status: "active"
 updated: "2026-10-24"
-code_ref: "b2b9c8c"
+code_ref: "3662e83"
 ---
 
 # RedMy - roadmap
@@ -19,6 +19,7 @@ code_ref: "b2b9c8c"
 | Phase 6 - Harden the Redmine writes | complete | - |
 | Phase 7 - Run the hardened skills | complete | Phase 6 |
 | Phase 8 - Settle skipped rows and corrections | complete | RM-D14, RM-D15 |
+| Phase 9 - Weekly board | implemented, verification open | RM-D17 |
 
 ## Phase 1 - Record the gap
 
@@ -70,12 +71,19 @@ code_ref: "b2b9c8c"
 - Acceptance: RM-Q4 and RM-Q5 are answered and the skill text follows the answers.
 - Final evidence: answered by the user on 2026-10-24 (RM-D14, RM-D15 in hallucination) and committed as 77bc40d. The delete-link filter was verified on the JSON API; the HTML page with its delete button was not observed.
 
+## Phase 9 - Weekly board
+
+- Acceptance: redmy-board renders the week in the shape RM-D17 fixes and lists every mismatch between Redmine entries and `history/` rows.
+- Verification gate: one observed run of the skill in the reference implementation, with the logged column matching the Redmine entries of the week. The hand-made board of 2026-10-24 that the skill was modeled on is not evidence of the skill.
+- Evidence so far: committed as 3662e83 on 2026-10-24.
+
 ## Risks
 
 | Risk | Effect | Status |
 |---|---|---|
-| README.md predates 1a84fca and 77bc40d: three skills, no redmy-core, no `redmine_user`/`redmine_base_url`/`tracking_since`, no `redmine_raw_request` in the requirements, old gate and lint text | a reader installs the skills without redmy-core and without the fields every skill now requires | open: README update deferred by the user on 2026-10-24 |
+| README.md predates 1a84fca and 77bc40d: three skills, no redmy-core or redmy-board, no `redmine_user`/`redmine_base_url`/`tracking_since`, no `redmine_raw_request` in the requirements, old gate and lint text | a reader installs the skills without redmy-core and without the fields every skill now requires | open: README update deferred by the user on 2026-10-24 |
 | redmy-core has never run | a step can fail in an empty project in a way the text does not show | open until Phase 4 |
+| redmy-board has never run | its reconciliation or its undrafted-day check can miss or invent a mismatch | open until Phase 9 |
 | SHA exclusion sees only SHAs; a logged row whose Evidence is "Redmine time entry" protects none of its commits | an issue whose window starts before such rows can re-draft their commits; observed: 36 uncited Atlantic commits from 2026-08-28 to 2026-10-06 sit on already-logged days, held back only by the per-issue windows, Constraints and the day cap | open, not scheduled |
 | The repo has no `LICENSE` file | reuse terms are undefined | observed 2026-10-13, outside this pack, not scheduled |
 
@@ -84,3 +92,4 @@ code_ref: "b2b9c8c"
 1. Phase 7 follow-up: the user answers the apply gate for the 7 draft rows, the 3 undetermined repo paths and the Saturday 2026-10-24 work, and decides entry 280483 through the correction flow.
 2. Phase 4: in an empty scratch directory with no access to the reference implementation, install or copy the four skills, run redmy-core then redmy-sync, and record what was created and asked.
 3. Phase 5: get the user's answer to RM-Q3 for `list_issues`.
+4. Phase 9: run redmy-board for the week of 2026-10-19 in the reference implementation and compare its logged column with Redmine.
