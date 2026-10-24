@@ -50,10 +50,10 @@ code_ref: "3662e83"
 
 ### RM-D3: redmy-apply guards against logging a row twice
 
-- Decision: before presenting, apply queries Redmine for each row's issue, user and date and marks any hit as a possible duplicate that is logged only on approval by name; after approval it logs one row at a time and writes each worklog link to `history/` right after its call succeeds. Since b2b9c8c the query is `redmine_raw_request` GET `/time_entries.json` with `from`/`to` (RM-D16).
+- Decision: before presenting, apply queries Redmine for each row's issue, user and date and marks any hit as a possible duplicate that is logged only on approval by name; after approval it logs one row at a time and writes each worklog link to `history/` right after its call succeeds. Since b2b9c8c the query is `redmine_raw_request` GET `/time_entries.json` with `from`/`to` (RM-D16); since the user approved it on 2026-10-24 it is one query per table, from the earliest to the latest row date, matched by issue and `spent_on`.
 - Why: a row logged right before an interrupted session still reads `Not logged` on disk, so the next run logs it again; the reference implementation's registry carries 9.0h of duplicate entries on one issue awaiting deletion.
 - What breaks if ignored: duplicate time entries that only a manual delete in Redmine removes (RM-D15).
-- Rejected: writing all links after the last call (the earlier step 5, loses the record of every row logged before an interruption); matching existing entries by comment text (a comment can be edited on Redmine, so a real duplicate would pass); `list_time_entries` with `from_date`/`to_date` (1a84fca, the tool ignores the dates - RM-D16).
+- Rejected: writing all links after the last call (the earlier step 5, loses the record of every row logged before an interruption); matching existing entries by comment text (a comment can be edited on Redmine, so a real duplicate would pass); `list_time_entries` with `from_date`/`to_date` (1a84fca, the tool ignores the dates - RM-D16); one query per row (b2b9c8c, as many calls as rows for the same answer).
 
 ### RM-D4: redmy-apply passes every row column to `smart_log_time` explicitly
 
