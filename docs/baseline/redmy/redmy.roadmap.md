@@ -40,9 +40,9 @@ code_ref: "3662e83"
 
 ## Phase 4 - Close the bootstrap gap
 
-- Acceptance: each of the four files and the history table can be learned from the installed skills alone, by the option chosen for RM-Q1 (RM-D12: redmy-core).
-- Verification gate: install the skills into an empty scratch project and run redmy-core and redmy-sync there without access to the reference implementation, then record which files they created and what they asked; redmy-sync is read-only against Redmine. A read of the edited skill text is not evidence of that behavior.
-- Evidence so far: redmy-core and `references/schemas.md` committed as 77bc40d on 2026-10-24; the reference implementation was migrated to the schema by hand (frontmatter `redmine_base_url` and `tracking_since: 2026-10-20`, skipped rows inline). redmy-core itself has not run.
+- Acceptance: each of the four files and the history table can be learned from the installed skills alone, by the option chosen for RM-Q1 (RM-D12: redmy-bootstrap).
+- Verification gate: install the skills into an empty scratch project and run redmy-bootstrap and redmy-sync there without access to the reference implementation, then record which files they created and what they asked; redmy-sync is read-only against Redmine. A read of the edited skill text is not evidence of that behavior.
+- Evidence so far: redmy-bootstrap and `references/schemas.md` committed as 77bc40d on 2026-10-24; the reference implementation was migrated to the schema by hand (frontmatter `redmine_base_url` and `tracking_since: 2026-10-20`, skipped rows inline). redmy-bootstrap itself has not run.
 
 ## Phase 5 - Decide redmy-sync paging
 
@@ -81,8 +81,8 @@ code_ref: "3662e83"
 
 | Risk | Effect | Status |
 |---|---|---|
-| README.md predates 1a84fca and 77bc40d: three skills, no redmy-core or redmy-board, no `redmine_user`/`redmine_base_url`/`tracking_since`, no `redmine_raw_request` in the requirements, old gate and lint text | a reader installs the skills without redmy-core and without the fields every skill now requires | open: README update deferred by the user on 2026-10-24 |
-| redmy-core has never run | a step can fail in an empty project in a way the text does not show | open until Phase 4 |
+| README.md predates 1a84fca and 77bc40d: three skills, no redmy-bootstrap or redmy-board, no `redmine_user`/`redmine_base_url`/`tracking_since`, no `redmine_raw_request` in the requirements, old gate and lint text | a reader installs the skills without redmy-bootstrap and without the fields every skill now requires | open: README update deferred by the user on 2026-10-24 |
+| redmy-bootstrap has never run | a step can fail in an empty project in a way the text does not show | open until Phase 4 |
 | redmy-board has never run | its reconciliation or its undrafted-day check can miss or invent a mismatch | open until Phase 9 |
 | SHA exclusion sees only SHAs; a logged row whose Evidence is "Redmine time entry" protects none of its commits | an issue whose window starts before such rows can re-draft their commits; observed: 36 uncited Atlantic commits from 2026-08-28 to 2026-10-06 sit on already-logged days, held back only by the per-issue windows, Constraints and the day cap | open, not scheduled |
 | The repo has no `LICENSE` file | reuse terms are undefined | observed 2026-10-13, outside this pack, not scheduled |
@@ -90,6 +90,6 @@ code_ref: "3662e83"
 ## Next action
 
 1. Phase 7 follow-up: the user answers the apply gate for the 7 draft rows, the 3 undetermined repo paths and the Saturday 2026-10-24 work, and decides entry 280483 through the correction flow.
-2. Phase 4: in an empty scratch directory with no access to the reference implementation, install or copy the four skills, run redmy-core then redmy-sync, and record what was created and asked.
+2. Phase 4: in an empty scratch directory with no access to the reference implementation, install or copy the four skills, run redmy-bootstrap then redmy-sync, and record what was created and asked.
 3. Phase 5: get the user's answer to RM-Q3 for `list_issues`.
 4. Phase 9: run redmy-board for the week of 2026-10-19 in the reference implementation and compare its logged column with Redmine.

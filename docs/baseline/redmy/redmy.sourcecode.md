@@ -11,7 +11,7 @@ code_ref: "3662e83"
 
 ## Execution flow
 
-0. redmy-core runs once per project: it creates the missing project files from `references/schemas.md`, confirms the Redmine login and asks for `redmine_base_url` and `tracking_since`, then hands over to redmy-sync. The other three skills stop and name redmy-core when a file or one of those frontmatter fields is missing.
+0. redmy-bootstrap runs once per project: it creates the missing project files from `references/schemas.md`, confirms the Redmine login and asks for `redmine_base_url` and `tracking_since`, then hands over to redmy-sync. The other three skills stop and name redmy-bootstrap when a file or one of those frontmatter fields is missing.
 1. redmy-sync checks the Redmine login against `redmine_user`, then refreshes `task-registry.md` from the user's assigned issues and own time entries and asks for every undetermined repo path; redmy-generate runs it inline first when `last_synced` is missing or more than 3 days old (generate step 0).
 2. redmy-generate reads the checkpoint (or `tracking_since` for an issue with no row), the SHAs already cited in `history/*.md`, the git identity map and the registry, then appends draft rows (`Worklog` = `Not logged`) to `history/*.md` and hands over to redmy-apply.
 3. redmy-apply checks the login, checks Redmine for an existing entry per row, lints, shows the whole table, and calls `smart_log_time` row by row only after the user approves that exact table; it writes each worklog link right after its call and then advances `checkpoint.md`. Its correction flow gives the user a delete link and updates the files once the entry is gone.
@@ -23,7 +23,7 @@ R reads, W writes, C creates when missing, a dash means the skill never mentions
 
 redmy-board only reads: `task-registry.md`, `git-identity-map.md` and `history/*.md` (steps 0, 3 and 5), and is left out of the table.
 
-| File | redmy-core | redmy-sync | redmy-generate | redmy-apply |
+| File | redmy-bootstrap | redmy-sync | redmy-generate | redmy-apply |
 |---|---|---|---|---|
 | `task-registry.md` | C, adds missing frontmatter | R and W | R | R |
 | `checkpoint.md` | C | untouched by rule | R | W |
@@ -31,7 +31,7 @@ redmy-board only reads: `task-registry.md`, `git-identity-map.md` and `history/*
 | `decisions.md` | C | W | R and W | - |
 | `history/<issue-id>-<slug>.md` | never | untouched by rule | R and W (creates lazily) | R and W |
 
-- redmy-core never overwrites an existing file; it only adds a missing file or frontmatter field.
+- redmy-bootstrap never overwrites an existing file; it only adds a missing file or frontmatter field.
 - redmy-sync's explicit "Do not" list forbids touching `checkpoint.md` and `history/*.md`; it writes Repo/Source answers into the registry (step 8).
 - redmy-generate writes `git-identity-map.md` only to add a confirmed author row (step 3) and `decisions.md` only to record a resolved ambiguity (step 5); it reads every `history/*.md` file for cited SHAs (step 2) and day totals (step 6).
 - redmy-apply reads `redmine_user`, `redmine_base_url`, Status and Constraints from `task-registry.md` (steps 0 and 1), reads every `history/*.md` file for day totals and duplicate rows (lint checks 6 and 8), and builds the worklog link from `redmine_base_url` (step 5).
@@ -40,7 +40,7 @@ redmy-board only reads: `task-registry.md`, `git-identity-map.md` and `history/*
 
 | Skill | Reads | Writes |
 |---|---|---|
-| redmy-core | `get_current_user` | none |
+| redmy-bootstrap | `get_current_user` | none |
 | redmy-sync | `get_current_user`, `list_issues`, `get_issue`, `redmine_raw_request` GET `/time_entries.json` | none |
 | redmy-generate | `list_issues`, `list_projects` | none |
 | redmy-apply | `get_current_user`, `redmine_raw_request` GET `/time_entries.json` | `smart_log_time` |
@@ -50,7 +50,7 @@ redmy-board only reads: `task-registry.md`, `git-identity-map.md` and `history/*
 
 ## Formats
 
-The formats live in `redmy-core/references/schemas.md`, which is the only definition (RM-D12 in hallucination). In summary:
+The formats live in `redmy-bootstrap/references/schemas.md`, which is the only definition (RM-D12 in hallucination). In summary:
 
 | File | Fields and columns |
 |---|---|

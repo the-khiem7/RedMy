@@ -11,14 +11,14 @@ code_ref: "3662e83"
 
 ## Scope
 
-RedMy is a repository of five agent skills (`redmy-core`, `redmy-sync`, `redmy-generate`, `redmy-apply`, `redmy-board`) that draft Redmine worklogs from git history, log them only after the user approves the exact table, and show a week's logged and draft hours as a board. This pack tracks two things: the skills' dependency on files in the project they are installed into (their formats and how they are created), and the safety of what the skills write to Redmine. Out of scope: Redmine API behavior beyond the tool behavior the skills depend on, and the README illustration work (pack `frontdoor`). In scope from the README: only its data-contract wording (Phase 2 in roadmap).
+RedMy is a repository of five agent skills (`redmy-bootstrap`, `redmy-sync`, `redmy-generate`, `redmy-apply`, `redmy-board`) that draft Redmine worklogs from git history, log them only after the user approves the exact table, and show a week's logged and draft hours as a board. This pack tracks two things: the skills' dependency on files in the project they are installed into (their formats and how they are created), and the safety of what the skills write to Redmine. Out of scope: Redmine API behavior beyond the tool behavior the skills depend on, and the README illustration work (pack `frontdoor`). In scope from the README: only its data-contract wording (Phase 2 in roadmap).
 
 ## Current truth
 
 | Claim | Basis |
 |---|---|
-| `redmy-core/references/schemas.md` defines every project file; the other skills point to it | decided: RM-D12 in hallucination |
-| redmy-core creates the missing files and the frontmatter fields `redmine_user`, `redmine_base_url` and `tracking_since`; sync, generate and apply stop and name redmy-core when one is missing | decided: RM-D12 |
+| `redmy-bootstrap/references/schemas.md` defines every project file; the other skills point to it | decided: RM-D12 in hallucination |
+| redmy-bootstrap creates the missing files and the frontmatter fields `redmine_user`, `redmine_base_url` and `tracking_since`; sync, generate and apply stop and name redmy-bootstrap when one is missing | decided: RM-D12 |
 | `history/<issue-id>-<slug>.md` is still created lazily, by redmy-generate step 7 | read: redmy-generate SKILL.md |
 | The installer copies only the selected skill's folder | read from installer source, not from a run: RM-D13 |
 | `task-registry.md` carries `redmine_user`; sync and apply stop when the MCP is authenticated as anyone else | decided: RM-D2 |
@@ -40,7 +40,7 @@ A new project can learn each file's name, columns and creation rule from the ins
 
 ## Constraints
 
-- redmy-sync is read-only against Redmine and only redmy-apply may call `smart_log_time` or `create_time_entry`; redmy-core creates local files only. Sync and apply call `redmine_raw_request` with GET only.
+- redmy-sync is read-only against Redmine and only redmy-apply may call `smart_log_time` or `create_time_entry`; redmy-bootstrap creates local files only. Sync and apply call `redmine_raw_request` with GET only.
 - A skill can rely only on files inside its own folder, plus a sibling skill the user installed: RM-D13.
 - `smart_log_time` defaults `spent_on` to today when it is omitted; `list_time_entries` ignores `from_date`/`to_date` and has no offset: RM-D16.
 - The MCP `redmine_raw_request` blocks DELETE, and the MCP has no tool that deletes a time entry: RM-D15.

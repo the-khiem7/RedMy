@@ -5,11 +5,11 @@ description: Refresh task-registry.md against real Redmine data - new/renamed/cl
 
 # Redmine Worklog - Sync Registry
 
-Sync `task-registry.md` with the real data on Redmine. Read-only (writes nothing to Redmine), so there is no need to ask for confirmation before running. The format of every project file is defined in the `redmy-core` skill's `references/schemas.md` (installed next to this skill).
+Sync `task-registry.md` with the real data on Redmine. Read-only (writes nothing to Redmine), so there is no need to ask for confirmation before running. The format of every project file is defined in the `redmy-bootstrap` skill's `references/schemas.md` (installed next to this skill).
 
 ## Steps
 
-1. If `task-registry.md` is missing, or its frontmatter lacks `redmine_user`, `redmine_base_url` or `tracking_since`, stop and tell the user to run the `redmy-core` skill first (`npx skills add the-khiem7/RedMy --skill redmy-core` if it is not installed). Otherwise call `get_current_user` and compare its `login` with `redmine_user`. If they differ, stop and report both values - the MCP is authenticated as someone else and the registry would fill with that person's issues.
+1. If `task-registry.md` is missing, or its frontmatter lacks `redmine_user`, `redmine_base_url` or `tracking_since`, stop and tell the user to run the `redmy-bootstrap` skill first (`npx skills add the-khiem7/RedMy --skill redmy-bootstrap` if it is not installed). Otherwise call `get_current_user` and compare its `login` with `redmine_user`. If they differ, stop and report both values - the MCP is authenticated as someone else and the registry would fill with that person's issues.
 2. `list_issues(assigned_to_id=<id>, status="*", limit=100)` to get all issues currently assigned to the user.
 3. Read the user's time entries since `last_synced` (or `tracking_since` on the first sync) and collect their issue ids: `redmine_raw_request(path="/time_entries.json", params={"user_id": <id>, "from": <date>, "limit": 100, "offset": <n>})`, raising `offset` by 100 until `total_count` entries are read. Reason: an issue the user logs time on but is not assigned to (reassigned later, or primarily assigned to a colleague) never appears in step 2. Do not use `list_time_entries` for a date window: it ignores `from_date` and `to_date` and returns every entry, and it has no offset.
 4. Read `task-registry.md` and diff it against the issues from steps 2 and 3:
@@ -18,7 +18,7 @@ Sync `task-registry.md` with the real data on Redmine. Read-only (writes nothing
    - Issue fully closed and no longer active -> keep it in the table (the history is still valuable), only update Status.
 5. For each issue in the table, sum the `hours` of all the user's entries on it - `redmine_raw_request(path="/time_entries.json", params={"issue_id": <issue>, "user_id": <id>, "limit": 100, "offset": <n>})`, paged as in step 3 - and write that total into the "Hours logged (cache, as of <date>)" column - always include the refresh date, never leave a number without a date. The column holds the user's own hours: `spent_hours`/`total_spent_hours` from `get_issue` count every user on the issue, so an issue shared with a colleague would show their hours as the user's. An epic shows only the entries logged on it directly.
 6. Update `last_synced` in the frontmatter of `task-registry.md` to today.
-7. If an exclusion/rename is found that is not merely a field update (for example: removing a project entirely at the user's request, or re-confirming an ambiguous name that maps to no issue) -> record it as a new entry in `decisions.md` (an Entry index row plus a new `RW-D<n>` section, as `redmy-core` defines it), do not just edit silently.
+7. If an exclusion/rename is found that is not merely a field update (for example: removing a project entirely at the user's request, or re-confirming an ambiguous name that maps to no issue) -> record it as a new entry in `decisions.md` (an Entry index row plus a new `RW-D<n>` section, as `redmy-bootstrap` defines it), do not just edit silently.
 8. Report back to the user: how many tasks were newly added, how many statuses/subjects changed - no need to ask for approval because this is a read operation. Then list every row whose Repo/Source is `*(not yet determined)*` and ask the user for each one's local repo path, or `none` when the work has no repo; write each answer into the row. Reason: `redmy-generate` never scans an issue without a repo, so an undetermined row drafts nothing.
 
 ## Do not

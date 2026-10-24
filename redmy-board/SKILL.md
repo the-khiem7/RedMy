@@ -5,11 +5,11 @@ description: Show the user's worklog board for one week - one row per day, one c
 
 # Redmine Worklog - Weekly Board
 
-Show where one week stands: what is on Redmine, what is drafted and waiting for `redmy-apply`, and which days are short or have work with no row. Read-only - this skill writes nothing, locally or to Redmine, so it needs no approval. The format of every project file is defined in the `redmy-core` skill's `references/schemas.md` (installed next to this skill).
+Show where one week stands: what is on Redmine, what is drafted and waiting for `redmy-apply`, and which days are short or have work with no row. Read-only - this skill writes nothing, locally or to Redmine, so it needs no approval. The format of every project file is defined in the `redmy-bootstrap` skill's `references/schemas.md` (installed next to this skill).
 
 ## Steps
 
-0. If `task-registry.md` is missing, or its frontmatter lacks `redmine_user` or `redmine_base_url`, stop and tell the user to run the `redmy-core` skill first. Otherwise call `get_current_user` and compare its `login` with `redmine_user`; if they differ, stop and report both values - the board would show another person's hours.
+0. If `task-registry.md` is missing, or its frontmatter lacks `redmine_user` or `redmine_base_url`, stop and tell the user to run the `redmy-bootstrap` skill first. Otherwise call `get_current_user` and compare its `login` with `redmine_user`; if they differ, stop and report both values - the board would show another person's hours.
 1. Take the week as Monday to Sunday containing today, or the week the user names.
 2. Read the user's entries of that week from Redmine: `redmine_raw_request(path="/time_entries.json", params={"user_id": <id>, "from": <Monday>, "to": <Sunday>, "limit": 100, "offset": <n>})`, raising `offset` until `total_count` entries are read. Do not use `list_time_entries`: it ignores `from_date`/`to_date`.
 3. Read every row of `history/*.md` dated in that week: its issue (from the file name), Hours, Worklog value, and whether the Redmine Comment carries `[needs confirmation]`.

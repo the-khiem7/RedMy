@@ -4,7 +4,7 @@ Every redmy skill reads the files below at the project root with these exact nam
 
 ## task-registry.md
 
-One row per Redmine issue or epic the user tracks. Only `redmy-sync` writes rows; `redmy-core` creates the file.
+One row per Redmine issue or epic the user tracks. Only `redmy-sync` writes rows; `redmy-bootstrap` creates the file.
 
 ```markdown
 ---

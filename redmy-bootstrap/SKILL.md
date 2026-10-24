@@ -1,5 +1,5 @@
 ---
-name: redmy-core
+name: redmy-bootstrap
 description: Own the data contract of the RedMy skills and create it in a new project - the format of task-registry.md, checkpoint.md, git-identity-map.md, decisions.md and history/*.md. Run it once before the first redmy-sync, and whenever another redmy skill stops on a missing file or frontmatter field. Writes local files only, never writes to Redmine.
 ---
 

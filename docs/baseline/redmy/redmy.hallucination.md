@@ -25,7 +25,7 @@ code_ref: "cb434e7"
 | RM-D9 | Which date a commit belongs to | closed | - |
 | RM-D10 | Source of issue discovery and cached hours in redmy-sync | closed | RM-D2, RM-Q3, RM-D16 |
 | RM-D11 | Where the rules added in 1a84fca live | closed | - |
-| RM-D12 | redmy-core owns the data contract and bootstraps a new project | closed | RM-Q1, RM-D1, RM-D13 |
+| RM-D12 | redmy-bootstrap owns the data contract and bootstraps a new project | closed | RM-Q1, RM-D1, RM-D13 |
 | RM-D13 | What the installer copies for one skill | closed | RM-Q2, RM-D12 |
 | RM-D14 | Format of a skipped row | closed | RM-Q4, RM-D8 |
 | RM-D15 | How a logged entry is corrected or removed | closed | RM-Q5, RM-D3 |
@@ -39,12 +39,12 @@ code_ref: "cb434e7"
 
 - Believed: README.md (at 74bd929, lines 23-24) says the installing project must provide the data files "or let `redmy-sync`/`redmy-generate` create on first run".
 - Disproved by: redmy-sync reads `task-registry.md` (step 3) and appends to `decisions.md` (step 6); redmy-generate reads `checkpoint.md` (step 1), reads and adds rows to `git-identity-map.md` (step 2), and reads `decisions.md` (step 4). None has a step that creates those four files or defines their columns. The one file a skill creates is `history/<issue-id>-<slug>.md`, by redmy-generate step 6, lazily when an issue first has real work hours.
-- Decision: no document asserts the claim; the README states what the skills do today and the gap stays recorded here until RM-Q1 is answered. RM-Q1 was answered by RM-D12: since 77bc40d the skill redmy-core creates the four files.
+- Decision: no document asserts the claim; the README states what the skills do today and the gap stays recorded here until RM-Q1 is answered. RM-Q1 was answered by RM-D12: since 77bc40d the skill redmy-bootstrap creates the four files.
 - What breaks if ignored: a reader installs the skills into an empty project expecting a bootstrap and runs skills that read files that do not exist; what the skill does then is not specified anywhere.
 
 ### RM-D2: Check the Redmine login against `redmine_user` before acting
 
-- Decision: redmy-apply step 0 and redmy-sync step 1 compare `get_current_user` `login` with `redmine_user` in the `task-registry.md` frontmatter and stop on a mismatch. Since 77bc40d redmy-core writes the field once after the user confirms it (RM-D12); sync and apply stop and point to redmy-core when it is missing.
+- Decision: redmy-apply step 0 and redmy-sync step 1 compare `get_current_user` `login` with `redmine_user` in the `task-registry.md` frontmatter and stop on a mismatch. Since 77bc40d redmy-bootstrap writes the field once after the user confirms it (RM-D12); sync and apply stop and point to redmy-bootstrap when it is missing.
 - Why: the MCP acts as whoever owns its API key, and the reference implementation records pair-work days on a colleague's machine.
 - What breaks if ignored: hours land in another person's Redmine record, and sync fills the registry with that person's issues.
 - Rejected: comparing against the git author names in `git-identity-map.md` (git names differ per repo and are not Redmine logins); no check (the earlier behavior); sync writing the field itself (1a84fca, replaced so one skill owns the frontmatter).
@@ -112,11 +112,11 @@ code_ref: "cb434e7"
 - What breaks if ignored: the file's premise stops holding, and a reader can no longer tell learned rules from designed ones.
 - Rejected: adding them as rules 6 and 7 (planned on 2026-10-24, dropped for the reason above).
 
-### RM-D12: A fourth skill, redmy-core, owns the data contract and bootstraps a new project
+### RM-D12: A fourth skill, redmy-bootstrap, owns the data contract and bootstraps a new project
 
 Closes RM-Q1.
 
-- Decision: `redmy-core/references/schemas.md` is the only definition of `task-registry.md`, `checkpoint.md`, `git-identity-map.md`, `decisions.md` and `history/*.md`; the other skills point to it. redmy-core creates missing files without touching existing ones, confirms the Redmine login, and asks for `redmine_base_url` and `tracking_since`, written to the registry frontmatter. Sync, generate and apply stop and name redmy-core when a file or field is missing. Chosen by the user on 2026-10-24, name included.
+- Decision: `redmy-bootstrap/references/schemas.md` is the only definition of `task-registry.md`, `checkpoint.md`, `git-identity-map.md`, `decisions.md` and `history/*.md`; the other skills point to it. redmy-bootstrap creates missing files without touching existing ones, confirms the Redmine login, and asks for `redmine_base_url` and `tracking_since`, written to the registry frontmatter. Sync, generate and apply stop and name redmy-bootstrap when a file or field is missing. Chosen by the user on 2026-10-24, name included.
 - Why: one owner per format stops copies drifting, and the installer copies only the selected skill's folder (RM-D13), so a shared file must live in a skill. The same read found three gaps that made an empty project unworkable even with the files present:
   - no skill filled Repo/Source - sync left it `*(not yet determined)*` and generate scanned nothing for such an issue, silently; now sync step 8 asks for each path (or `none`) and generate reports unscanned issues;
   - an issue with no checkpoint row had no window start, so generate could read the whole git history and draft days already logged by hand; now it starts at `tracking_since`;
