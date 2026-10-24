@@ -4,41 +4,43 @@ pack: "redmy"
 document: "introduction"
 status: "active"
 updated: "2026-10-24"
-code_ref: "1a84fca"
+code_ref: "b2b9c8c"
 ---
 
 # RedMy - skill behavior and data contract
 
 ## Scope
 
-RedMy is a repository of three agent skills (`redmy-sync`, `redmy-generate`, `redmy-apply`) that draft Redmine worklogs from git history and log them only after the user approves the exact table. This pack tracks two things: the debt in the skills' dependency on files in the project they are installed into (the formats and creation of those files are not defined in this repo), and the safety of what the skills write to Redmine. Out of scope: Redmine API behavior beyond the tool behavior the skills depend on, and the README illustration work (pack `frontdoor`). In scope from the README: only its data-contract wording (Phase 2 in roadmap).
+RedMy is a repository of four agent skills (`redmy-core`, `redmy-sync`, `redmy-generate`, `redmy-apply`) that draft Redmine worklogs from git history and log them only after the user approves the exact table. This pack tracks two things: the skills' dependency on files in the project they are installed into (their formats and how they are created), and the safety of what the skills write to Redmine. Out of scope: Redmine API behavior beyond the tool behavior the skills depend on, and the README illustration work (pack `frontdoor`). In scope from the README: only its data-contract wording (Phase 2 in roadmap).
 
 ## Current truth
 
 | Claim | Basis |
 |---|---|
-| The skills ship process logic only, no data and no schema files for the project files | read: README.md and the skill folders |
-| The installing project is expected to hold `task-registry.md`, `checkpoint.md`, `git-identity-map.md`, `decisions.md`, `history/<issue-id>-<slug>.md` and a Redmine base URL (`<REDMINE_BASE_URL>`) | read: README.md and the skill steps; the file-by-skill matrix is in sourcecode |
-| Only `history/<issue-id>-<slug>.md` has a creation step, in redmy-generate step 7, lazily | read: redmy-generate SKILL.md |
-| `task-registry.md` carries a `redmine_user` frontmatter field; sync and apply stop when the MCP is authenticated as anyone else | decided: RM-D2 in hallucination |
+| `redmy-core/references/schemas.md` defines every project file; the other skills point to it | decided: RM-D12 in hallucination |
+| redmy-core creates the missing files and the frontmatter fields `redmine_user`, `redmine_base_url` and `tracking_since`; sync, generate and apply stop and name redmy-core when one is missing | decided: RM-D12 |
+| `history/<issue-id>-<slug>.md` is still created lazily, by redmy-generate step 7 | read: redmy-generate SKILL.md |
+| The installer copies only the selected skill's folder | read from installer source, not from a run: RM-D13 |
+| `task-registry.md` carries `redmine_user`; sync and apply stop when the MCP is authenticated as anyone else | decided: RM-D2 |
 | Apply checks Redmine for an existing entry per row, maps every column to `smart_log_time` including `spent_on`, and writes each worklog link right after its call | decided: RM-D3, RM-D4 |
 | Apply lint blocks `[needs confirmation]` rows, closed issues and parent epics, days over 8.0h, future or unconfirmed weekend dates, and duplicate rows | decided: RM-D5, RM-D6 |
-| Generate drops commits already cited as evidence, caps a date at 8.0h across issues, and dates a commit as `git log` prints it | decided: RM-D7, RM-D8, RM-D9 |
-| Sync finds issues from the user's own time entries and caches only the user's own hours | decided: RM-D10 |
-| None of the changes in 1a84fca has been run against Redmine | observed: Phase 7 in roadmap is planned |
-| README.md still describes the gate, lint and drafting rules and the data contract as they were before 1a84fca | observed: README.md unchanged by the user's choice on 2026-10-24 |
-| The README no longer claims the skills create the project files on first run; the skill steps never supported that for the four files other than `history/` | decided: RM-D1 in hallucination |
-| The column layouts the skills assume are never shown in this repo | read: listed in sourcecode |
-| `npx skills add <owner>/RedMy --skill <name>` installs a skill | unverified: RM-Q2 in hallucination |
+| Generate drops commits already cited as evidence, caps a date at 8.0h across issues not counting skipped rows, and dates a commit by its author date | decided: RM-D7, RM-D8, RM-D9 |
+| Sync finds issues from the user's own time entries, caches only the user's own hours, and asks for every undetermined repo path | decided: RM-D10, RM-D12 |
+| A skipped row stays in place with Worklog `**Skipped**` and its reason in Evidence | decided: RM-D14 |
+| A wrong logged entry is deleted by the user from a filtered Redmine link; the skill then resets the row and the checkpoint | decided: RM-D15 |
+| Date-window reads of time entries go through `redmine_raw_request` GET with `from`/`to`/`offset` | observed and decided: RM-D16 |
+| Sync, generate and apply up to the gate ran against Redmine and the reference implementation on 2026-10-24 | observed: Phase 7 in roadmap |
+| README.md describes three skills, no bootstrap, the old gate and lint text, and lacks `redmine_user`, `redmine_base_url`, `tracking_since` and `redmine_raw_request` | observed: README.md unchanged by the user's choice on 2026-10-24 |
+| The README no longer claims the skills create the project files on first run | decided: RM-D1 |
 
 ## Target
 
-A new project can learn each file's name, columns and creation rule from the installed skills alone, and no document in the repo claims behavior the skills lack. The path to that is open: RM-Q1 in hallucination. Every entry the skills write is approved, logged once, on its own date, as the right user, and a wrong entry can be corrected through the skill: RM-Q5 in hallucination.
+A new project can learn each file's name, columns and creation rule from the installed skills alone, and no document in the repo claims behavior the skills lack. Every entry the skills write is approved, logged once, on its own date, as the right user, and a wrong entry can be corrected through the skill. Remaining: Phase 4 verification in a project with no reference implementation, and the README.
 
 ## Constraints
 
-- redmy-sync is read-only against Redmine and only redmy-apply may call `smart_log_time` or `create_time_entry`; any bootstrap fix creates local files only and leaves that gate untouched.
-- The reference implementation of the contract lives in the original working repo (README.md line 32), whose location this repo does not record; its formats cannot be copied from here.
-- Where a schema may live depends on what the installer copies: unverified, RM-Q2 in hallucination.
-- `smart_log_time` defaults `spent_on` to today when it is omitted, and `list_time_entries` has no offset parameter.
-- The MCP `redmine_raw_request` blocks DELETE, and the MCP has no tool that deletes a time entry: RM-Q5 in hallucination.
+- redmy-sync is read-only against Redmine and only redmy-apply may call `smart_log_time` or `create_time_entry`; redmy-core creates local files only. Sync and apply call `redmine_raw_request` with GET only.
+- A skill can rely only on files inside its own folder, plus a sibling skill the user installed: RM-D13.
+- `smart_log_time` defaults `spent_on` to today when it is omitted; `list_time_entries` ignores `from_date`/`to_date` and has no offset: RM-D16.
+- The MCP `redmine_raw_request` blocks DELETE, and the MCP has no tool that deletes a time entry: RM-D15.
+- The reference implementation of the contract is the user's private worklog repo; its data never enters this repo, and schemas.md uses made-up values.
