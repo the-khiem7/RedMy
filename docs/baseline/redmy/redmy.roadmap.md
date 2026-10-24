@@ -3,8 +3,8 @@ baseline_schema: "2.0"
 pack: "redmy"
 document: "roadmap"
 status: "active"
-updated: "2026-10-13"
-code_ref: "37d69c3"
+updated: "2026-10-24"
+code_ref: "1a84fca"
 ---
 
 # RedMy - roadmap
@@ -16,6 +16,9 @@ code_ref: "37d69c3"
 | Phase 3 - Verify what the installer copies | planned | - |
 | Phase 4 - Close the bootstrap gap | planned | Phase 3, RM-Q1 |
 | Phase 5 - Decide redmy-sync paging | planned | - |
+| Phase 6 - Harden the Redmine writes | complete | - |
+| Phase 7 - Run the hardened skills | planned | Phase 6 |
+| Phase 8 - Settle skipped rows and corrections | planned | RM-Q4, RM-Q5 |
 
 ## Phase 1 - Record the gap
 
@@ -43,6 +46,21 @@ code_ref: "37d69c3"
 - Acceptance: RM-Q3 is answered, and if a paging step is added the fetch no longer depends on a single page.
 - Verification gate: observed behavior of the Redmine list tool against a result larger than the limit, not the skill text.
 
+## Phase 6 - Harden the Redmine writes
+
+- Acceptance: the skill text carries RM-D2 to RM-D11 in hallucination.
+- Final evidence: committed as 1a84fca on 2026-10-24 (6 files: the three SKILL.md files, `lint-rules.md`, `apply-gate.md`, `rules.md`). Read back and checked for en and em dashes; nothing was executed. The findings came from an evaluation of the skills against the reference implementation's data on 2026-10-24.
+
+## Phase 7 - Run the hardened skills
+
+- Acceptance: in the reference implementation, redmy-sync runs end to end, redmy-generate drafts rows, and redmy-apply runs up to its gate without logging.
+- Verification gate: observed output shows the login check passing, sync hours equal to the user's own entries, no draft citing an already-cited SHA, no date above 8.0h, and apply's duplicate check and lint checks 5 to 8 reporting on real rows. A read of the skill text is not evidence.
+
+## Phase 8 - Settle skipped rows and corrections
+
+- Acceptance: RM-Q4 and RM-Q5 are answered and the skill text follows the answers.
+- Verification gate: for RM-Q5 option b, one observed PUT on a time entry with the user's permissions; the skill text alone is not evidence.
+
 ## Risks
 
 | Risk | Effect | Status |
@@ -50,7 +68,11 @@ code_ref: "37d69c3"
 | README no longer claims a bootstrap but the formats are still unknown to a new user | the first run of redmy-sync has no file to diff against and its behavior is unspecified | open until Phase 4 |
 | A schema is copied into several skills | the copies drift | open: RM-Q1 |
 | The repo has no `LICENSE` file | reuse terms are undefined | observed 2026-10-13, outside this pack, not scheduled |
+| README.md predates 1a84fca: its data-contract table lacks `redmine_user`, and its gate, lint and drafting-rule sections describe the old steps | a reader installs the skills without the field sync and apply now require | open: README update deferred by the user on 2026-10-24 |
+| The skill text in 1a84fca was never run | a step can fail against the real MCP tools in a way the text does not show | open until Phase 7 |
 
 ## Next action
 
-Phase 3: in an empty scratch directory outside this repo, run `npx skills add the-khiem7/RedMy --skill redmy-sync`, list every file it placed, and record that listing as the answer to RM-Q2; then answer RM-Q1.
+1. Phase 7: in the reference implementation, run redmy-sync, then redmy-generate, then redmy-apply up to its gate without approving; record what was observed.
+2. Phase 8: get the user's answers to RM-Q4 and RM-Q5.
+3. Phase 3: in an empty scratch directory outside this repo, run `npx skills add the-khiem7/RedMy --skill redmy-sync`, list every file it placed, and record that listing as the answer to RM-Q2; then answer RM-Q1.
