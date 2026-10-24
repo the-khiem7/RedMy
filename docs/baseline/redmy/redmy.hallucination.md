@@ -4,7 +4,7 @@ pack: "redmy"
 document: "hallucination"
 status: "active"
 updated: "2026-10-24"
-code_ref: "3662e83"
+code_ref: "cb434e7"
 ---
 
 # RedMy - decisions and open questions
@@ -31,6 +31,7 @@ code_ref: "3662e83"
 | RM-D15 | How a logged entry is corrected or removed | closed | RM-Q5, RM-D3 |
 | RM-D16 | `list_time_entries` ignores its date filters | closed - lesson | RM-D3, RM-D10, RM-Q3 |
 | RM-D17 | A read-only weekly board skill, redmy-board | closed | RM-D16, RM-D15 |
+| RM-D18 | Approving part of an apply table | closed | RM-D3, RM-D5 |
 
 ## Closed decisions
 
@@ -85,10 +86,10 @@ code_ref: "3662e83"
 
 ### RM-D8: The hours of one date across all issues are capped at 8.0, never topped up
 
-- Decision: generate step 6 keeps the sum of a date's hours, existing rows plus new drafts and not counting `**Skipped**` rows, at 8.0 or less; a short day stays short and is asked about; a confirmed weekend is written into Evidence.
+- Decision: generate step 6 keeps the sum of a date's hours, existing rows plus new drafts and not counting `**Skipped**` rows, at 8.0 or less; a short day stays short and is asked about; a confirmed weekend is written into Evidence. Hours the user asks to add are the user's own account: they go on the row the user names, or the issue with most of that day's commits, and Evidence ends with `filled to <h> for the day at the user's request on <date>` (rule 1 in `rules.md`, schemas.md). Approved by the user on 2026-10-24, after a run where the user asked to fill two short days and the skill had no way to record it.
 - Why: "balance at ~8h per working day" pushed drafts toward filling the day, which contradicts rule 1 of `rules.md` (no padding on thin evidence), and did not say whether 8h was per issue or per day.
 - What breaks if ignored: padded hours, or two issues each drafted to 8h on one day.
-- Rejected: balancing each working day to about 8h (the earlier step 5).
+- Rejected: balancing each working day to about 8h (the earlier step 5); a fill with no Evidence marker (a later reader cannot tell the user's account from agent padding).
 
 ### RM-D9: A commit belongs to the author date `git log` prints for it, in local time
 
@@ -170,6 +171,13 @@ Closes RM-Q5.
 - Why: no skill answered where a week stands without moving the cycle forward - generate appends rows and apply leads to the write gate; a fixed shape keeps the board the same from week to week.
 - What breaks if ignored: the board depends on the agent improvising it, and a mismatch such as an entry on Redmine whose row is Skipped is found only by chance.
 - Rejected: a board step inside redmy-sync (sync writes `task-registry.md`, so the board would no longer be safe to ask for at any time); a board step inside redmy-apply (it would sit in front of the write gate, where a request to look turns into a request to log).
+
+### RM-D18: The apply table may be approved in part, by day or row
+
+- Decision: redmy-apply step 5 logs exactly the days or rows the user's answer names, leaves the rest `Not logged`, and presents the rest again, as a new table when the answer changed any of its rows; a row the answer does not name is not approved. The gate wording in `apply-gate.md` is unchanged. Approved by the user on 2026-10-24, after answering a gate with "Tue: approve" plus instructions for two other days.
+- Why: the step read as one approval for the whole table, so a per-day answer left the agent to guess whether the unnamed rows were approved.
+- What breaks if ignored: a row the user never named is logged, or an approved day waits for rows still under discussion.
+- Rejected: requiring one approval for the whole table (a single disputed row blocks every other row); treating silence on a row as approval (logs a row the user never saw approved).
 
 ## Open questions
 

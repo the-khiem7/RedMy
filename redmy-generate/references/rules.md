@@ -11,6 +11,7 @@ Mistake that occurred: called a commit that only bumped a submodule reference (2
 - Read neighbouring commits (a few hours, a few days before/after) to find the real work behind a thin "summary" commit.
 - If the commit points to a submodule, read that submodule's README/content to understand what the commit represents - but **do not consider the submodule's internal history** to assess effort (see SKILL.md step 5, and the matching entry in `decisions.md`) - use it only to understand the CONTENT; "how many hours is it worth" must still be based on the user's actual effort in the parent repo.
 - If there is still not enough basis after investigating: ask the user directly, do not keep guessing a third time.
+- Hours the user asks for (for example "fill in the lacking time" for a short day) are the user's own account, not padding: add them to the row the user names, or to the issue with most of that day's commits, and end its Evidence with `filled to <h> for the day at the user's request on <date>`. Never add hours on your own initiative.
 
 ## 2. Do not leak internal terminology/process in the Redmine Comment
 

@@ -105,7 +105,7 @@ Append-only. Do not edit/delete rows whose `Worklog` is already a real link. Row
 | Activity | a Redmine time entry activity name, as `list_time_entry_activities` returns it |
 | Redmine Comment | one sentence in backticks; may end with `[needs confirmation]` while a judgment call is open |
 | Worklog | `Not logged` (draft), `[View worklog](<redmine_base_url>/time_entries/<id>/edit)` (logged), or `**Skipped**` (never logged, kept for the record) |
-| Evidence | repo name and commit SHA(s), a range `<a>..<b>`, or `Self-reported by the user - no commit`; also records a weekend day the user confirmed, the reason a row was skipped (`skipped: <reason>`), and the entry a row replaces after a correction |
+| Evidence | repo name and commit SHA(s), a range `<a>..<b>`, or `Self-reported by the user - no commit`; also records a weekend day the user confirmed, the reason a row was skipped (`skipped: <reason>`), the entry a row replaces after a correction, and hours the user asked to add (`filled to <h> for the day at the user's request on <date>`) |
 
 - A skipped row stays in the table at its date. There is no separate table for skipped rows.
 - A line below the table such as `> Total logged on Redmine: 12.0h.` is optional and is never read as data.
