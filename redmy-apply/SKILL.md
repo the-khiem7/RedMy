@@ -9,11 +9,14 @@ This is the only step allowed to call `smart_log_time`/`create_time_entry`. Alwa
 
 ## Steps
 
-1. Scan all of `history/*.md` for rows whose Worklog = `Not logged` (skip rows marked `**Skipped**`).
-2. Run lint before presenting - see `references/lint-rules.md`. For any row that fails lint, state clearly why it failed; do not fix it on your own and then log it - let the user decide how to fix it.
-3. Present the whole table (grouped by day, in the format the user is used to approving) together with the total hours per issue. Apply the gate in `references/apply-gate.md` word for word - do not shorten it, and do not skip this step even if the user seems impatient.
-4. Only after the user has explicitly approved **this** table (not a general approval given earlier): call `smart_log_time` for each row, with the activity defaulting to "Developing" unless the user specifies otherwise.
-5. For each row logged successfully: replace `Not logged` with `[View worklog](<REDMINE_BASE_URL>/time_entries/<id>/edit)` directly in the corresponding `history/` file.
+0. Call `get_current_user` and compare its `login` with `redmine_user` in the `task-registry.md` frontmatter. If they differ, or `redmine_user` is missing, stop and report both values - log nothing. Reason: the Redmine MCP logs as whoever owns its API key, and a session on a shared or borrowed machine can carry another person's key; a mismatch writes hours into that person's record.
+1. Scan all of `history/*.md` for rows whose Worklog = `Not logged` (skip rows marked `**Skipped**`). Read `task-registry.md` too: the Status and Constraints of each row's issue are lint input in step 3.
+2. Check Redmine for each row before presenting it: `list_time_entries(issue_id=<issue>, user_id=<id from step 0>, from_date=<Date>, to_date=<Date>)`. If any entry comes back, mark the row `possible duplicate (#<entry id>, <hours>h)` in the table and do not log it unless the user approves that row by name. If the user confirms the entry is that row, write its link into the `history/` file instead of logging again. Reason: a row logged right before an interrupted session still reads `Not logged` on disk, and logging it again creates a duplicate entry that has to be deleted by hand.
+3. Run lint before presenting - see `references/lint-rules.md`. For any row that fails lint, state clearly why it failed; do not fix it on your own and then log it - let the user decide how to fix it.
+4. Present the whole table grouped by day, with the columns Date, Issue, Hours, Activity, Redmine Comment and Evidence, together with the total hours per issue. Apply the gate in `references/apply-gate.md` word for word - do not shorten it, and do not skip this step even if the user seems impatient.
+5. Only after the user has explicitly approved **this** table (not a general approval given earlier), log the rows one at a time. For each row:
+   1. Call `smart_log_time` with `issue_id` = the issue id from the `history/` file name, `spent_on` = the row's Date, `hours` = Hours, `activity` = the row's Activity, and `comment` = the Redmine Comment without its surrounding backticks. Never omit `spent_on`: the tool defaults to today, which files a backdated row on the wrong day.
+   2. As soon as the call succeeds, replace `Not logged` with `[View worklog](<REDMINE_BASE_URL>/time_entries/<id>/edit)` in the corresponding `history/` file, before calling for the next row. Reason: the link on disk is the only record that a row was logged; writing the links at the end leaves every row logged so far unrecorded if the session stops midway, and the next run logs them again.
 6. Update `checkpoint.md`: for each issue that just had a row logged successfully, set `Last Logged Date`/`Last Logged Hours` from the latest row (by date) that was actually logged - not the last row in the file, if the dates are not strictly increasing.
 7. Report back to the user: the total hours logged successfully, and list explicitly which rows could NOT be logged (error/permission/rejected) with the reason - see the "When a row fails" section below.
 
@@ -23,6 +26,6 @@ Do not try other ways to get around it on your own (switching tools, changing pa
 
 ## Do not
 
-- Do not log any row that is not in the table the user explicitly approved in step 3 - even if the agent judges that row to be "definitely correct".
+- Do not log any row that is not in the table the user explicitly approved in step 4 - even if the agent judges that row to be "definitely correct".
 - Do not treat one approval as applying to the next generate cycle, or to a table that was edited after approval.
 - Do not edit the Redmine Comment text on your own to get past lint and then log it - report the lint error and let the user or `redmy-generate` fix it.

@@ -2,7 +2,7 @@
 
 Mirrors the spirit of a `terraform apply`-style approval gate - do not shorten it, do not reinterpret its meaning.
 
-> Never call `smart_log_time`/`create_time_entry` on your own. Present the full draft table (date, hours, issue, comment) - then wait for the user's explicit approval of that exact request.
+> Never call `smart_log_time`/`create_time_entry` on your own. Present the full draft table (date, issue, hours, activity, comment) - then wait for the user's explicit approval of that exact request.
 >
 > Gate scope: every command that writes data to Redmine (`smart_log_time`, `create_time_entry`, and any other way that leads to the same result of writing real work hours to the system).
 >

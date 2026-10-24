@@ -9,7 +9,7 @@ Mistake that occurred: called a commit that only bumped a submodule reference (2
 **Correct approach**: if the commit's content (subject + the actual diff, not just the subject) is not clear enough to match the number of hours you intend to assign, investigate further before assigning:
 - Read the full diff (`git show`), not just the subject.
 - Read neighbouring commits (a few hours, a few days before/after) to find the real work behind a thin "summary" commit.
-- If the commit points to a submodule, read that submodule's README/content to understand what the commit represents - but **do not consider the submodule's internal history** to assess effort (see SKILL.md step 4, and the matching entry in `decisions.md`) - use it only to understand the CONTENT; "how many hours is it worth" must still be based on the user's actual effort in the parent repo.
+- If the commit points to a submodule, read that submodule's README/content to understand what the commit represents - but **do not consider the submodule's internal history** to assess effort (see SKILL.md step 5, and the matching entry in `decisions.md`) - use it only to understand the CONTENT; "how many hours is it worth" must still be based on the user's actual effort in the parent repo.
 - If there is still not enough basis after investigating: ask the user directly, do not keep guessing a third time.
 
 ## 2. Do not leak internal terminology/process in the Redmine Comment
