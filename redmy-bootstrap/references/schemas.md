@@ -59,6 +59,22 @@ Which git author names on each repo are the user. `redmy-generate` adds a row on
 | `C:\repos\example-service` | `jane.doe`, `jdoe-laptop` | 2026-01-06 |
 ```
 
+## aws-identity-map.md
+
+Optional. Which AWS profile and CloudTrail user name show the user's own activity for each repo, read by `redmy-generate` step 5b to look for work that left no commit. `redmy-generate` adds a row only after the user confirms it; a project with no rows skips that step.
+
+```markdown
+# AWS Identity Map
+
+| Repo | AWS profile | Account | CloudTrail Username | Confirmed on |
+|---|---|---|---|---|
+| `C:\repos\example-service` | `aws-example-uat` | `111122223333` | `jane.doe@example.com` | 2026-01-06 |
+```
+
+- Profile names come from `aws configure list-profiles`. Account is the `get-caller-identity` account id of that profile.
+- CloudTrail Username is the SSO session name (the user's email) for an SSO profile and the IAM user name for a static-key profile.
+- One repo may have several rows, one per profile. The file holds no keys, tokens or secrets.
+
 ## decisions.md
 
 One-off ambiguities that were resolved, so they are not asked again. A rule that applies to one issue every cycle belongs in the Constraints column of `task-registry.md` instead.
