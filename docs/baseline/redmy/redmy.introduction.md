@@ -3,8 +3,8 @@ baseline_schema: "2.0"
 pack: "redmy"
 document: "introduction"
 status: "active"
-updated: "2026-10-24"
-code_ref: "3662e83"
+updated: "2026-11-04"
+code_ref: "8ee0f82"
 ---
 
 # RedMy - skill behavior and data contract
@@ -33,6 +33,9 @@ RedMy is a repository of five agent skills (`redmy-bootstrap`, `redmy-sync`, `re
 | Sync, generate and apply up to the gate ran against Redmine and the reference implementation on 2026-10-24 | observed: Phase 7 in roadmap |
 | README.md describes three skills, no bootstrap, the old gate and lint text, and lacks `redmine_user`, `redmine_base_url`, `tracking_since` and `redmine_raw_request` | observed: README.md unchanged by the user's choice on 2026-10-24 |
 | The README no longer claims the skills create the project files on first run | decided: RM-D1 |
+| redmy-generate step 5b may look up the user's own CloudTrail events for a day with thin commits, through the optional `aws-identity-map.md`; a hit is evidence of presence, never hours, and unattended runs skip it | decided: RM-D19; never run as a skill |
+| redmy-generate step 5a lists the agent's session transcripts of a thin day for work with no commit; findings are candidate self-reported rows | decided: RM-D20; never run as a skill |
+| redmy-generate takes `<day...> /<month>` to draft named days only | decided: RM-D21; never run as a skill |
 
 ## Target
 
@@ -41,6 +44,7 @@ A new project can learn each file's name, columns and creation rule from the ins
 ## Constraints
 
 - redmy-sync is read-only against Redmine and only redmy-apply may call `smart_log_time` or `create_time_entry`; redmy-bootstrap creates local files only. Sync and apply call `redmine_raw_request` with GET only.
+- The only AWS calls a skill makes are `sts get-caller-identity` and `cloudtrail lookup-events` in redmy-generate step 5b: read-only, each naming its profile, never printing keys or tokens: RM-D19.
 - A skill can rely only on files inside its own folder, plus a sibling skill the user installed: RM-D13.
 - `smart_log_time` defaults `spent_on` to today when it is omitted; `list_time_entries` ignores `from_date`/`to_date` and has no offset: RM-D16.
 - The MCP `redmine_raw_request` blocks DELETE, and the MCP has no tool that deletes a time entry: RM-D15.

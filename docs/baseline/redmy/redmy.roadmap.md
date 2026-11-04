@@ -3,8 +3,8 @@ baseline_schema: "2.0"
 pack: "redmy"
 document: "roadmap"
 status: "active"
-updated: "2026-10-24"
-code_ref: "3662e83"
+updated: "2026-11-04"
+code_ref: "8ee0f82"
 ---
 
 # RedMy - roadmap
@@ -20,6 +20,7 @@ code_ref: "3662e83"
 | Phase 7 - Run the hardened skills | complete | Phase 6 |
 | Phase 8 - Settle skipped rows and corrections | complete | RM-D14, RM-D15 |
 | Phase 9 - Weekly board | implemented, verification open | RM-D17 |
+| Phase 10 - Evidence beyond git | implemented, verification open | RM-D19, RM-D20, RM-D21 |
 
 ## Phase 1 - Record the gap
 
@@ -77,6 +78,12 @@ code_ref: "3662e83"
 - Verification gate: one observed run of the skill in the reference implementation, with the logged column matching the Redmine entries of the week. The hand-made board of 2026-10-24 that the skill was modeled on is not evidence of the skill.
 - Evidence so far: committed as 3662e83 on 2026-10-24.
 
+## Phase 10 - Evidence beyond git
+
+- Acceptance: redmy-generate step 5b looks up CloudTrail by `Username` for a thin day through `aws-identity-map.md`, step 5a lists session transcripts, hours come from neither, and `<day...> /<month>` drafts only the named days.
+- Verification gate: one observed interactive run in the reference implementation on a day with few commits, with the SSO session valid and then expired, recording the events reported, the Evidence written on a row and the skip message; an unattended run reports both steps skipped. A read of the skill text is not evidence.
+- Evidence so far: committed as 8ee0f82 on 2026-11-04. The lookups were run by hand on the data of 2026-11-02 over six profiles (RM-D19); neither step has run as a skill.
+
 ## Risks
 
 | Risk | Effect | Status |
@@ -85,6 +92,7 @@ code_ref: "3662e83"
 | redmy-bootstrap has never run | a step can fail in an empty project in a way the text does not show | open until Phase 4 |
 | redmy-board has never run | its reconciliation or its undrafted-day check can miss or invent a mismatch | open until Phase 9 |
 | SHA exclusion sees only SHAs; a logged row whose Evidence is "Redmine time entry" protects none of its commits | an issue whose window starts before such rows can re-draft their commits; observed: 36 uncited Atlantic commits from 2026-08-28 to 2026-10-06 sit on already-logged days, held back only by the per-issue windows, Constraints and the day cap | open, not scheduled |
+| redmy-generate steps 5a and 5b have never run | a lookup can be misread in a way the text does not show (global events, the 90-day window, a Username that differs for a static key) | open until Phase 10 |
 | The repo has no `LICENSE` file | reuse terms are undefined | observed 2026-10-13, outside this pack, not scheduled |
 
 ## Next action
@@ -93,3 +101,4 @@ code_ref: "3662e83"
 2. Phase 4: in an empty scratch directory with no access to the reference implementation, install or copy the four skills, run redmy-bootstrap then redmy-sync, and record what was created and asked.
 3. Phase 5: get the user's answer to RM-Q3 for `list_issues`.
 4. Phase 9: run redmy-board for the week of 2026-10-19 in the reference implementation and compare its logged column with Redmine.
+5. Phase 10: run redmy-generate interactively for a day with few commits in the reference implementation, with a valid and then an expired SSO session, and record what steps 5a and 5b reported and wrote.

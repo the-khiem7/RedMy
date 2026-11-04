@@ -3,8 +3,8 @@ baseline_schema: "2.0"
 pack: "redmy"
 document: "hallucination"
 status: "active"
-updated: "2026-10-24"
-code_ref: "cb434e7"
+updated: "2026-11-04"
+code_ref: "8ee0f82"
 ---
 
 # RedMy - decisions and open questions
@@ -32,6 +32,9 @@ code_ref: "cb434e7"
 | RM-D16 | `list_time_entries` ignores its date filters | closed - lesson | RM-D3, RM-D10, RM-Q3 |
 | RM-D17 | A read-only weekly board skill, redmy-board | closed | RM-D16, RM-D15 |
 | RM-D18 | Approving part of an apply table | closed | RM-D3, RM-D5 |
+| RM-D19 | CloudTrail lookup as optional evidence of presence for a day with thin commits | closed | RM-D8, RM-D12 |
+| RM-D20 | Session transcripts as a lead for work that left no commit | closed | RM-D8, RM-D19 |
+| RM-D21 | Day arguments for a backdated redmy-generate run | closed | RM-D7, RM-D9 |
 
 ## Closed decisions
 
@@ -178,6 +181,46 @@ Closes RM-Q5.
 - Why: the step read as one approval for the whole table, so a per-day answer left the agent to guess whether the unnamed rows were approved.
 - What breaks if ignored: a row the user never named is logged, or an approved day waits for rows still under discussion.
 - Rejected: requiring one approval for the whole table (a single disputed row blocks every other row); treating silence on a row as approval (logs a row the user never saw approved).
+
+### RM-D19: CloudTrail is optional evidence of presence for a day with thin commits, never of hours
+
+- Decision: redmy-generate step 5b, interactive only and with the user's agreement, runs `aws cloudtrail lookup-events` with `AttributeKey=Username` on the profiles of the optional `aws-identity-map.md` (Repo, AWS profile, Account, CloudTrail Username; schema in `redmy-bootstrap/references/schemas.md`) for the local day converted to UTC. A hit becomes a self-reported `[needs confirmation]` row whose Evidence names the profile, the account id and the first and last event time; hours still come from commit times or the user's account. Unattended runs skip the step and say so. Asked by the user on 2026-11-04 as a backup way to scout a day.
+- Why: observed on 2026-11-02 over six SSO profiles - the day's write events (194 to 1109 per account) were all instance-profile and EKS roles, and the `Username` filter found 42 events, all reads (one console session of two minutes). The same lookup did not show the day's teardown work, which ran in an account reached by a static IAM key, so a hit is evidence of presence and a miss proves nothing.
+- Facts the step relies on (fragments copied from the page text the AWS docs tool returned; not opened in a browser):
+
+| Fact | Source |
+|---|---|
+| Lookup covers management events of the last 90 days in one Region | [LookupEvents](https://docs.aws.amazon.com/awscloudtrail/latest/APIReference/API_LookupEvents.html#:~:text=You%20can%20look%20up%20events%20that%20occurred%20in%20a%20Region%20within%20the%20last%2090%20days) |
+| Two lookups per second per account per Region, then a throttling error; 50 events per page | [LookupEvents](https://docs.aws.amazon.com/awscloudtrail/latest/APIReference/API_LookupEvents.html#:~:text=The%20rate%20of%20lookup%20requests%20is%20limited%20to%20two%20per%20second%2C%20per%20account%2C%20per%20Region) |
+| One attribute filter and a time range per search, one account, one Region | [Event history limitations](https://docs.aws.amazon.com/awscloudtrail/latest/userguide/view-cloudtrail-events.html#:~:text=cannot%20query%20multiple%20attributes) |
+| The user name searched is the IAM user's friendly name or the assumed role session name | [Monitor account activity of specific IAM users, roles, and keys](https://repost.aws/knowledge-center/view-iam-history#:~:text=or%20the%20assumed%20role%20session%20name) |
+| Lookup shows global-service events (IAM, CloudFront, STS) in the Region where they occurred | [CloudTrail concepts](https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-concepts.html#:~:text=will%20show%20these%20events%20in%20the%20AWS%20Region%20where%20they%20occurred) |
+
+- What breaks if ignored: hours inferred from an event span (a two-minute span drafts a near-zero day, a long one a padded day), "no events" read as "no work", or a lookup on an expired SSO session stopping the unattended automation.
+- Not observed: step 5b run as a skill; the lookups above were run by hand.
+- Rejected:
+
+| Option | What | Why it lost |
+|---|---|---|
+| a | Filter `ReadOnly=false` | a lookup takes one attribute, and it returns the write calls of service roles (730 against 42 in the observed account) while hiding the user's read-only work |
+| b | Hours from the first-to-last event span | presence is not effort; breaks rule 1 in `rules.md` (RM-D8) |
+| c | A Repo/Source-style column in `task-registry.md` | only redmy-sync writes that file, and one repo can need several profiles; a new optional file mirrors `git-identity-map.md` |
+| d | Run it in the unattended automation | no SSO login is possible and nobody can agree to the lookup |
+| e | Read the AWS config file for profile names | a PreToolUse hook blocks shell commands that read a secrets path (observed 2026-11-04); `aws configure list-profiles` prints names only |
+
+### RM-D20: Session transcripts are a lead for work that left no commit, never hours
+
+- Decision: redmy-generate step 5a, interactive only, lists the agent's session transcripts of a day still thin after step 5 and puts any work without a commit to the user as a candidate self-reported row. Asked by the user on 2026-11-04 ("scouting commit on Mon to detect work on that day").
+- Why: on 2026-11-02 the transcripts showed four pieces of work with no commit (planning, a diagram, a new skill, a teardown); the active time computed from them (gaps over 30 minutes cut) was 0.2 to 1.1h per session and understates console work, reading and waiting.
+- What breaks if ignored: a day of planning or console work stays short, or the user is asked to recall it cold; or hours taken from active time under-log it.
+- Rejected: hours from active time (understates real effort); running the step unattended (nobody can say whether a transcript topic was work or personal tooling, see RW-D9 in the reference implementation).
+
+### RM-D21: redmy-generate takes `<day...> /<month>` to draft named days only
+
+- Decision: with `02 03 04 /11` the skill drafts only those days of November of the current year; each named day replaces the issue's checkpoint start for that day alone, steps 2 to 8 apply unchanged (cited commits dropped, day cap kept), and a day that already has a row on an issue is shown, not redrafted, unless the user asks. Asked by the user on 2026-11-04 after running that argument, which the skill did not define.
+- Why: without an argument the window runs from the checkpoint to today, so a request for three named days was an interpretation by the agent.
+- What breaks if ignored: a backdated run drafts every day since the checkpoint, or reads the argument differently from run to run.
+- Rejected: letting named days bypass step 2 (the same commit would become evidence twice, RM-D7); adding hours to a named day that already has a row on the issue (lint check 8 in redmy-apply would fail the duplicate).
 
 ## Open questions
 

@@ -3,8 +3,8 @@ baseline_schema: "2.0"
 pack: "redmy"
 document: "sourcecode"
 status: "active"
-updated: "2026-10-24"
-code_ref: "3662e83"
+updated: "2026-11-04"
+code_ref: "8ee0f82"
 ---
 
 # RedMy - contract topology
@@ -13,7 +13,7 @@ code_ref: "3662e83"
 
 0. redmy-bootstrap runs once per project: it creates the missing project files from `references/schemas.md`, confirms the Redmine login and asks for `redmine_base_url` and `tracking_since`, then hands over to redmy-sync. The other three skills stop and name redmy-bootstrap when a file or one of those frontmatter fields is missing.
 1. redmy-sync checks the Redmine login against `redmine_user`, then refreshes `task-registry.md` from the user's assigned issues and own time entries and asks for every undetermined repo path; redmy-generate runs it inline first when `last_synced` is missing or more than 3 days old (generate step 0).
-2. redmy-generate reads the checkpoint (or `tracking_since` for an issue with no row), the SHAs already cited in `history/*.md`, the git identity map and the registry, then appends draft rows (`Worklog` = `Not logged`) to `history/*.md` and hands over to redmy-apply.
+2. redmy-generate reads the checkpoint (or `tracking_since` for an issue with no row), the SHAs already cited in `history/*.md`, the git identity map and the registry, then appends draft rows (`Worklog` = `Not logged`) to `history/*.md` and hands over to redmy-apply. On a day still thin after the commit scan, an interactive run may also list session transcripts (step 5a) and, with the user's agreement, look up the user's own CloudTrail events per `aws-identity-map.md` (step 5b); neither sets hours, and an unattended run skips both.
 3. redmy-apply checks the login, checks Redmine for an existing entry per row, lints, shows the whole table, and calls `smart_log_time` row by row only after the user approves that exact table; it writes each worklog link right after its call and then advances `checkpoint.md`. Its correction flow gives the user a delete link and updates the files once the entry is gone.
 4. redmy-board runs at any point: it reads one week from Redmine and `history/*.md`, plus `git log` for days with no row, and writes nothing.
 
@@ -28,12 +28,14 @@ redmy-board only reads: `task-registry.md`, `git-identity-map.md` and `history/*
 | `task-registry.md` | C, adds missing frontmatter | R and W | R | R |
 | `checkpoint.md` | C | untouched by rule | R | W |
 | `git-identity-map.md` | C | - | R and W | - |
+| `aws-identity-map.md` | C, empty | - | R and W | - |
 | `decisions.md` | C | W | R and W | - |
 | `history/<issue-id>-<slug>.md` | never | untouched by rule | R and W (creates lazily) | R and W |
 
 - redmy-bootstrap never overwrites an existing file; it only adds a missing file or frontmatter field.
 - redmy-sync's explicit "Do not" list forbids touching `checkpoint.md` and `history/*.md`; it writes Repo/Source answers into the registry (step 8).
 - redmy-generate writes `git-identity-map.md` only to add a confirmed author row (step 3) and `decisions.md` only to record a resolved ambiguity (step 5); it reads every `history/*.md` file for cited SHAs (step 2) and day totals (step 6).
+- redmy-generate writes `aws-identity-map.md` only to add a confirmed profile-to-repo pairing (step 5b).
 - redmy-apply reads `redmine_user`, `redmine_base_url`, Status and Constraints from `task-registry.md` (steps 0 and 1), reads every `history/*.md` file for day totals and duplicate rows (lint checks 6 and 8), and builds the worklog link from `redmine_base_url` (step 5).
 
 ## Redmine tools per skill
@@ -46,6 +48,7 @@ redmy-board only reads: `task-registry.md`, `git-identity-map.md` and `history/*
 | redmy-apply | `get_current_user`, `redmine_raw_request` GET `/time_entries.json` | `smart_log_time` |
 | redmy-board | `get_current_user`, `redmine_raw_request` GET `/time_entries.json` | none |
 
+- redmy-generate step 5b also calls the AWS CLI, read-only and with `--profile` on every call: `sts get-caller-identity` and `cloudtrail lookup-events` (RM-D19 in hallucination).
 - `list_time_entries` is not used: it ignores `from_date`/`to_date` and has no offset (RM-D16 in hallucination).
 
 ## Formats
@@ -57,6 +60,7 @@ The formats live in `redmy-bootstrap/references/schemas.md`, which is the only d
 | `task-registry.md` | frontmatter `last_synced`, `redmine_user`, `redmine_base_url`, `tracking_since`; columns Task ID, Project, Subject, Status, "Hours logged (cache, as of <date>)", Repo/Source, Constraints, Link |
 | `checkpoint.md` | one row per issue with Issue, `Last Logged Date`, `Last Logged Hours (that day)` |
 | `git-identity-map.md` | Repo, git author name(s) that are the user, Confirmed on |
+| `aws-identity-map.md` | optional; Repo, AWS profile, Account, CloudTrail Username, Confirmed on |
 | `decisions.md` | an Entry index table plus one `RW-D<n>` section per entry |
 | `history/<issue-id>-<slug>.md` | Date, Hours, Activity, Redmine Comment, Worklog, Evidence |
 
